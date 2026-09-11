@@ -1,0 +1,205 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   ManagR / BedR design tokens — the single source of truth.
+   Change the product's whole look from this :root block.
+   Colours follow BEDR-DESIGN-SYSTEM.md; the surface ladder gives the UI depth
+   without shadows or decoration.
+   ========================================================================== */
+:root {
+  /* radius hierarchy — tight where it's a control, softer where it's a surface.
+     5 (checkbox / kbd) · 8 (icon buttons, segmented, chips) · 10 (buttons, inputs,
+     rows) · 14 (cards, panels, modals, the website frame) · pill (status only). */
+  --radius-xs: 5px;
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  /* ---- surface ladder (app → workspace → panel → sunken) ---- */
+  --background: #fafafa;      /* ManagR app background */
+  --workspace: #e9eaee;       /* editor canvas area — the recessed stage the website frame floats on */
+  --surface: #ffffff;         /* panels, bars, elevated cards */
+  --surface-2: #f7f8f9;       /* quiet grouped area inside a white panel */
+  --sunken: #f1f2f4;          /* inset wells, input rests on white */
+
+  /* ---- editor panel system (left structure + right inspector) ---- */
+  --panel: #ffffff;           /* panel body */
+  --panel-header: #f8f9fb;    /* panel + group header strips — reads as "tool chrome" */
+  --panel-section: #f7f8f9;   /* a grouped region inside a panel */
+  --panel-hover: #f3f4f6;     /* row hover inside a panel */
+  --panel-border: #e6e7ea;    /* the seam between panel regions / groups */
+
+  --foreground: #111111;
+  --muted-foreground: #5f6368;
+  --faint: #8a8d92;
+
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+
+  --border: #e8e8e8;
+  --border-subtle: #eeeeee;   /* internal dividers */
+  --border-strong: #dcdcdc;
+
+  --primary: #f7553d;
+  --primary-foreground: #ffffff;
+  --primary-strong: #e5432b;
+  --brand: #f7553d;
+  --brand-strong: #e5432b;
+
+  /* ManagR sidebar — very dark navy, active item is a lighter navy fill (not coral) */
+  --navy: #0a1628;
+  --navy-foreground: #ffffff;
+  --overlay: rgb(10 22 40 / 0.55);   /* modal / sheet scrim — translucent navy */
+  --navy-active: #1b2b45;      /* selected nav row fill */
+  --navy-hover: #14213a;       /* nav row hover fill */
+  --navy-border: #1e2c44;
+
+  --secondary: #f1f2f4;
+  --secondary-foreground: #333333;
+
+  /* navy-blue secondary action (ManagR "Import" button, "Boys Only" chips) */
+  --secondary-blue: #1e40af;
+  --secondary-blue-surface: #eef2fb;
+  --secondary-blue-border: #c4d2f2;
+
+  /* ---- tinted icon-tile / metric surfaces (soft pastels from ManagR cards) ---- */
+  --tint-blue: #eaf1fb;   --tint-blue-fg: #2261b6;
+  --tint-green: #e7f4ee;  --tint-green-fg: #00875a;
+  --tint-amber: #fdf3e3;  --tint-amber-fg: #b45c09;
+  --tint-purple: #f2ecfb; --tint-purple-fg: #7a35c9;
+  --tint-coral: #fdeee9;  --tint-coral-fg: #d8452c;
+  --tint-cyan: #e5f4f5;   --tint-cyan-fg: #0e7490;
+
+  --muted: #f7f8f9;
+  --accent: #f1f2f4;          /* hover surface */
+  --accent-foreground: #111111;
+
+  --input: #dcdcdc;
+  --ring: #f7553d;
+
+  --destructive: #d33a29;
+  --destructive-foreground: #ffffff;
+
+  --success: #00875a;
+  --success-foreground: #ffffff;
+  --success-surface: #e7f4ef;
+  --success-border: #a8dcc8;
+
+  --warning: #b45c09;
+  --warning-foreground: #ffffff;
+  --warning-surface: #fdf5e7;
+  --warning-wash: #fbf7ef;   /* whisper-of-warm fill for a block that gently needs attention */
+  --warning-border: #f2d7a6;
+
+  --info: #2261b6;
+  --info-foreground: #ffffff;
+  --info-surface: #eaf1fa;
+  --info-border: #bcd4ef;
+
+  --advanced: #7a35c9;
+  --advanced-foreground: #ffffff;
+  --advanced-surface: #f4eefc;
+  --advanced-border: #e2d3f6;
+
+  --call: #2261b6;
+  --whatsapp: #57b562;
+
+  /* restrained elevation — depth mostly comes from the surface ladder.
+     e1 matches the ManagR/BEDR card shadow (shadow/card) at a slightly softer opacity. */
+  --shadow-xs: 0 1px 1.5px rgba(17, 17, 17, 0.05);
+  --shadow-e1: 0 1px 3px rgba(17, 17, 17, 0.06), 0 1px 2px -1px rgba(17, 17, 17, 0.04);
+  --shadow-e2: 0 4px 12px -3px rgba(17, 17, 17, 0.08), 0 2px 4px -2px rgba(17, 17, 17, 0.04);
+  --shadow-pop: 0 16px 40px -12px rgba(17, 17, 17, 0.16), 0 4px 12px -4px rgba(17, 17, 17, 0.07);
+  --shadow-frame: 0 1px 3px rgba(17, 17, 17, 0.05), 0 18px 40px -16px rgba(17, 17, 17, 0.12);
+
+  --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
+  --dur: 140ms;
+
+  --sidebar-w: 232px;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Always reserve the scrollbar track so centred content (the Website
+   Management page frame, dialogs) doesn't shift 7px between a page that
+   scrolls and one that doesn't. */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: theme("fontFamily.sans");
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: -0.014em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 20%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* image placeholder — a calm "photo area", never a wireframe hatch */
+.ph {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #f3f4f6, #eceef1);
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  min-height: 56px;
+}
+.ph svg { width: 18px; height: 18px; opacity: 0.55; }
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar { width: 10px; height: 10px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #d6d7db;
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #c2c3c8; background-clip: content-box; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}

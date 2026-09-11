@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ManagR · Owner Website Setup</title>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/prototype.css">
+</head>
+<body>
+
+<!-- ============================ ICON SPRITE ============================ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <g id="i-base" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></g>
+  </defs>
+  <symbol id="ic-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="ic-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></symbol>
+  <symbol id="ic-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></symbol>
+  <symbol id="ic-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="ic-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M3 12h18" stroke-linecap="round"/><path d="M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" stroke-linecap="round"/></symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="ic-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"/><path d="M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z"/></symbol>
+  <symbol id="ic-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></symbol>
+  <symbol id="ic-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7A2 2 0 0 1 22 16.9z"/></symbol>
+  <symbol id="ic-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+  <symbol id="ic-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 0 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+  <symbol id="ic-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 14L20 4M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="ic-whatsapp" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 2.1.55 4.06 1.6 5.83L2 22l4.4-1.15a9.9 9.9 0 0 0 5.64 1.72h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm5.8 14.03c-.25.7-1.45 1.34-2 1.42-.53.08-1.2.11-1.94-.12-.45-.14-1.02-.33-1.76-.65-3.1-1.34-5.12-4.46-5.28-4.67-.15-.2-1.26-1.67-1.26-3.19 0-1.52.8-2.27 1.08-2.58.28-.31.6-.39.8-.39.2 0 .4 0 .58.01.19.01.44-.07.68.52.25.6.85 2.08.92 2.23.08.15.13.32.02.52-.1.2-.16.32-.3.5-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12 1 2.07 1.31 2.36 1.46.3.15.47.13.64-.08.17-.2.74-.86.94-1.16.2-.3.4-.25.67-.15.27.1 1.72.81 2.01.96.3.15.5.22.57.35.07.13.07.73-.18 1.42z"/></symbol>
+  <symbol id="ic-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1M14 20h1M20 20h1M20 17h1M17 20v1"/></symbol>
+  <symbol id="ic-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17H2.5z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="ic-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ic-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4 4M9.4 5.2A9.3 9.3 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.3 4M6.1 6.1A17 17 0 0 0 2 12s3.5 7 10 7a9.3 9.3 0 0 0 3.4-.6"/></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="ic-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-.9 4.5"/><path d="M20 4v7h-7"/></symbol>
+  <symbol id="ic-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 8h.01M15 8h.01M9 12h.01M15 12h.01M10 21v-4h4v4"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20c0-3 2.7-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6a3 3 0 0 1 0 6M18 15c2 .6 3.5 2.2 3.5 4"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="ic-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M4 8h4M14 8h6M4 16h8M18 16h2"/><circle cx="10" cy="8" r="1.6"/><circle cx="15" cy="16" r="1.6"/></symbol>
+  <symbol id="ic-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/></symbol>
+  <symbol id="ic-power" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v8"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+</svg>
+
+<!-- ============================ APP SHELL ============================ -->
+<div class="app" id="appShell">
+  <div class="overlay" id="navBackdrop" data-close-nav></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand"><svg class="icon"><use href="#ic-home"/></svg> ManagR</div>
+    <a class="nav-item"><svg class="icon"><use href="#ic-home"/></svg> Dashboard</a>
+    <a class="nav-item"><svg class="icon"><use href="#ic-building"/></svg> Properties</a>
+    <a class="nav-item"><svg class="icon"><use href="#ic-users"/></svg> Leads &amp; CRM</a>
+    <a class="nav-item"><svg class="icon"><use href="#ic-calendar"/></svg> Scheduled Visits</a>
+    <a class="nav-item"><svg class="icon"><use href="#ic-wallet"/></svg> Payments</a>
+    <a class="nav-item is-active" aria-current="page"><svg class="icon"><use href="#ic-globe"/></svg> Website
+      <span class="nav-item__badge pill pill--sm pill--neutral" id="navPlanBadge">Free</span>
+    </a>
+    <a class="nav-item"><svg class="icon"><use href="#ic-settings"/></svg> Settings</a>
+  </aside>
+
+  <div class="app__main">
+    <header class="appbar">
+      <button class="btn btn--icon is-plain appbar__menu" id="menuBtn" aria-label="Open menu"><svg class="icon"><use href="#ic-menu"/></svg></button>
+      <span class="appbar__title">Website</span>
+      <span class="appbar__spacer"></span>
+      <span class="pill pill--sm pill--neutral" id="appbarPlan">Basic · Free</span>
+      <span class="avatar">NR</span>
+    </header>
+
+    <main class="content" id="dashboardContent">
+
+      <!-- ===== SCREEN 1 · LOCKED ===== -->
+      <section class="screen" data-screen="locked">
+        <div class="stack">
+          <div class="card card--pad-lg hero-explainer">
+            <span class="icon-tile icon-tile--brand"><svg class="icon"><use href="#ic-globe"/></svg></span>
+            <h1 class="t-page-title">Get your own website</h1>
+            <p class="t-body t-muted" style="margin-top:8px;max-width:42ch;margin-inline:auto">
+              Every ManagR owner gets a website on their own address, carrying their own name — built automatically from the property details you already keep with us.
+            </p>
+            <div class="cluster" style="justify-content:center;margin-top:16px">
+              <button class="btn btn--outline" data-open="sheet-sample"><svg class="icon"><use href="#ic-eye"/></svg> See a sample</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <p class="section-label t-micro">What you get</p>
+            <ul class="feature-list">
+              <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-globe"/></svg></span><div><b>One link for everything</b><span>Your WhatsApp bio, Instagram, visiting card and the board outside — one address.</span></div></li>
+              <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-image"/></svg></span><div><b>Photos, rent, rooms and location</b><span>Pulled live from your dashboard. No retyping, always correct.</span></div></li>
+              <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-phone"/></svg></span><div><b>Call &amp; WhatsApp buttons</b><span>Visitors reach you directly. No broker, no middleman.</span></div></li>
+            </ul>
+          </div>
+
+          <div class="notice notice--info">
+            <svg class="icon"><use href="#ic-lock"/></svg>
+            <div>
+              <p class="notice__title">What unlocks this</p>
+              <p class="notice__body t-caption">Add your first property and get it approved. Review usually takes about a day. Your website switches on the moment a property is approved.</p>
+            </div>
+          </div>
+
+          <button class="btn btn--primary btn--block btn--lg" id="addPropertyBtn"><svg class="icon"><use href="#ic-plus"/></svg> Add a property</button>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 2 · UNLOCKED ===== -->
+      <section class="screen" data-screen="unlocked">
+        <div class="stack">
+          <div class="setup-banner setup-banner--success">
+            <span class="icon-tile icon-tile--success"><svg class="icon"><use href="#ic-check-circle"/></svg></span>
+            <div class="setup-banner__body">
+              <p class="unlock-tag pill pill--success pill--sm" style="margin-bottom:6px"><svg class="icon"><use href="#ic-sparkles"/></svg> Approved</p>
+              <h1 class="t-page-title">“Shree Residency” is live on ManagR</h1>
+              <p class="t-body" style="margin-top:6px">Your website is ready to switch on. It already has your first property in it — you just need to pick your address.</p>
+            </div>
+          </div>
+
+          <div class="callout-preview">
+            <p class="section-label t-micro">A peek at your site</p>
+            <div class="phone-frame phone-frame--sm mini-thumb"><div class="phone-frame__bar"></div><div class="phone-frame__screen" data-visitor-preview="mini"></div></div>
+          </div>
+
+          <div class="wizard__actions" style="position:static;border:0;padding:0;background:none">
+            <button class="btn btn--primary btn--block btn--lg" data-go="wizard:address"><svg class="icon"><use href="#ic-globe"/></svg> Set up my website</button>
+          </div>
+          <button class="btn btn--link" style="align-self:center" data-later>I’ll do this later</button>
+        </div>
+      </section>
+
+      <!-- ===== LOADING (skeleton of website home) ===== -->
+      <section class="screen" data-screen="loading">
+        <div class="stack">
+          <div class="card"><div class="skeleton skeleton--line" style="width:40%"></div><div class="skeleton skeleton--block" style="margin-top:12px"></div></div>
+          <div class="card"><div class="skeleton skeleton--line" style="width:60%"></div><div class="skeleton skeleton--line" style="width:80%;margin-top:10px"></div></div>
+          <div class="count-row">
+            <div class="card"><div class="skeleton skeleton--line"></div><div class="skeleton skeleton--line" style="width:50%;margin-top:8px"></div></div>
+            <div class="card"><div class="skeleton skeleton--line"></div><div class="skeleton skeleton--line" style="width:50%;margin-top:8px"></div></div>
+            <div class="card"><div class="skeleton skeleton--line"></div><div class="skeleton skeleton--line" style="width:50%;margin-top:8px"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 7 · STEADY / SCREEN 8 · LIVE BUT EMPTY ===== -->
+      <section class="screen" data-screen="steady"><div class="wh-root" id="whSteady"></div></section>
+      <section class="screen" data-screen="empty"><div class="wh-root" id="whEmpty"></div></section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================ WIZARD ============================ -->
+<div class="wizard" id="wizard">
+  <div class="wizard__bar">
+    <button class="btn btn--icon is-plain" id="wizBack" aria-label="Back"><svg class="icon"><use href="#ic-chevron-left"/></svg></button>
+    <div class="grow">
+      <div class="stepper" id="wizStepper"></div>
+      <span class="stepper__label" id="wizStepLabel">Step 1 of 4</span>
+    </div>
+    <button class="btn btn--icon is-plain" id="wizClose" aria-label="Close setup"><svg class="icon"><use href="#ic-x"/></svg></button>
+  </div>
+
+  <div class="wizard__body">
+    <div class="wizard__inner">
+
+      <!-- ===== SCREEN 3 · CHOOSE ADDRESS ===== -->
+      <section class="screen" data-screen="address">
+        <div class="stack stack--md">
+          <div>
+            <h1 class="t-page-title">Choose your web address</h1>
+            <p class="t-body t-muted" style="margin-top:6px">This is the link you’ll share everywhere. Pick something short and easy to say out loud.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="addrInput">Web address</label>
+            <div class="url-field" id="urlField">
+              <span class="url-field__affix">https://</span>
+              <input class="url-field__input" id="addrInput" type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="your-name" aria-describedby="addrHint">
+              <span class="url-field__affix">.managr.in</span>
+              <span class="url-field__status" id="addrStatus"></span>
+            </div>
+            <p class="field__hint" id="addrHint">Choose your web address to continue.</p>
+            <div id="addrSuggest" style="margin-top:8px"></div>
+          </div>
+
+          <div class="card card--plain" style="background:var(--color-n-50)">
+            <p class="t-caption t-muted">Your link will be</p>
+            <p class="url-echo" id="addrEcho">https://<b>your-name</b>.managr.in</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 4 · CONFIRM ADDRESS ===== -->
+      <section class="screen" data-screen="confirm">
+        <div class="stack stack--md">
+          <div>
+            <h1 class="t-page-title">Confirm your address</h1>
+            <p class="t-body t-muted" style="margin-top:6px">Check this carefully. Your address is set once — it gets printed on boards and pasted into WhatsApp groups, so it can’t be changed on your own later.</p>
+          </div>
+
+          <div class="card card--pad-lg center" style="background:var(--color-n-50)">
+            <p class="t-caption t-muted" style="margin-bottom:8px">Your website address</p>
+            <p class="url-echo url-echo--lg" id="confirmEcho"></p>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" id="confirmCheck">
+            <span class="check__box"><svg class="icon"><use href="#ic-check"/></svg></span>
+            <span>I understand this address is permanent. To change it later I’ll need to contact ManagR support.</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 5 · BASIC INFO ===== -->
+      <section class="screen" data-screen="info">
+        <div class="stack stack--md">
+          <div>
+            <h1 class="t-page-title">Tell visitors a bit about you</h1>
+            <p class="t-body t-muted" style="margin-top:6px">All optional. Anything you leave blank uses a sensible default — you can edit it anytime from your website page.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="fHeadline">Headline</label>
+            <input class="input" id="fHeadline" type="text" placeholder="e.g. Shree Residency — PG &amp; Hostel stays in Andheri">
+            <p class="field-fallback">If blank: <b id="fbHeadline"></b></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="fAbout">About</label>
+            <textarea class="input" id="fAbout" rows="3" placeholder="A line or two about your place"></textarea>
+            <p class="field-fallback">If blank: <b id="fbAbout"></b></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="fPhone">Contact number</label>
+            <input class="input" id="fPhone" type="tel" inputmode="tel" placeholder="Phone number">
+            <p class="field-fallback">If blank: <b>your ManagR account number</b></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="fEmail">Email</label>
+            <input class="input" id="fEmail" type="email" inputmode="email" placeholder="you@example.com">
+            <p class="field-fallback">If blank: <b>hidden — visitors use call &amp; WhatsApp</b></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="fOffice">Office address</label>
+            <input class="input" id="fOffice" type="text" placeholder="Area where visitors can reach you">
+            <p class="field-fallback">Shown as a general area only. Never linked to a property’s exact address. If blank: <b>hidden</b></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 6 · WEBSITE IS LIVE ===== -->
+      <section class="screen" data-screen="live">
+        <div class="confetti" id="confetti"></div>
+        <div class="stack stack--md live-hero">
+          <span class="icon-tile icon-tile--success"><svg class="icon"><use href="#ic-check-circle"/></svg></span>
+          <div>
+            <h1 class="t-page-title">Your website is live</h1>
+            <p class="t-body t-muted" style="margin-top:6px">Anyone with the link can see it now. Share it wherever you talk to people.</p>
+          </div>
+
+          <div class="copybar" id="liveCopybar"></div>
+
+          <div class="stack stack--sm">
+            <button class="btn btn--success btn--block" id="liveWhatsapp"><svg class="icon"><use href="#ic-whatsapp"/></svg> Share on WhatsApp</button>
+            <div class="row" style="gap:12px">
+              <button class="btn btn--outline grow" data-open="sheet-qr"><svg class="icon"><use href="#ic-qr"/></svg> QR code</button>
+              <button class="btn btn--outline grow" id="liveOpen"><svg class="icon"><use href="#ic-external"/></svg> Open site</button>
+            </div>
+          </div>
+
+          <div class="card" style="text-align:left">
+            <p class="section-label t-micro">What next</p>
+            <ul class="feature-list">
+              <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-plus"/></svg></span><div><b>Add more properties</b><span>Every approved property shows up here automatically.</span></div></li>
+              <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-sparkles"/></svg></span><div><b>Let visitors book visits &amp; enquire</b><span class="adv-lock"><svg class="icon"><use href="#ic-lock"/></svg> Advanced</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="wizard__actions" id="wizActions"></div>
+</div>
+
+<!-- ============================ VISITOR SHELL ============================ -->
+<div class="visitor-shell" id="visitorShell">
+  <div class="visitor-shell__bar">
+    <button class="btn btn--icon is-plain" id="visitorClose" aria-label="Close preview" style="color:#fff"><svg class="icon"><use href="#ic-x"/></svg></button>
+    <span class="u" id="visitorUrl"></span>
+    <span class="appbar__spacer"></span>
+    <button class="btn btn--icon is-plain" id="visitorBackList" aria-label="Back to list" hidden style="color:#fff"><svg class="icon"><use href="#ic-chevron-left"/></svg></button>
+  </div>
+  <div class="visitor-shell__frame"><div class="visitor-shell__scroll" id="visitorScroll"></div></div>
+</div>
+
+<!-- ============================ OVERLAYS ============================ -->
+<div id="overlayRoot"></div>
+<div class="toast-root" id="toastRoot" aria-live="polite"></div>
+
+<!-- Sample-site sheet -->
+<div class="overlay" data-sheet="sheet-sample">
+  <div class="sheet sheet--wide" role="dialog" aria-modal="true" aria-label="Sample website">
+    <div class="sheet__grip"></div>
+    <div class="sheet__header sheet__header--bordered">
+      <div><p class="sheet__title">A sample website</p><p class="sheet__subtitle">This is a demo owner — yours uses your real properties.</p></div>
+      <button class="btn btn--icon is-plain" data-close-sheet aria-label="Close"><svg class="icon"><use href="#ic-x"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <div class="phone-frame"><div class="phone-frame__bar"></div><div class="phone-frame__screen" data-visitor-preview="sample"></div></div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--primary" data-close-sheet>Got it</button></div>
+  </div>
+</div>
+
+<!-- Property submitted sheet -->
+<div class="overlay" data-sheet="sheet-submitted">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Property submitted">
+    <div class="sheet__grip"></div>
+    <div class="sheet__header">
+      <div><p class="sheet__title">Property sent for review</p></div>
+      <button class="btn btn--icon is-plain" data-close-sheet aria-label="Close"><svg class="icon"><use href="#ic-x"/></svg></button>
+    </div>
+    <div class="sheet__body stack stack--sm">
+      <div class="notice notice--info"><svg class="icon"><use href="#ic-clock"/></svg><div><p class="notice__title">Usually approved within a day</p><p class="notice__body t-caption">We’ll message you on WhatsApp. Your website switches on automatically when it’s approved.</p></div></div>
+      <p class="t-caption t-muted">For this prototype you can skip the wait:</p>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--outline" data-close-sheet>OK</button>
+      <button class="btn btn--primary" id="simApprove"><svg class="icon"><use href="#ic-check"/></svg> Simulate approval</button>
+    </div>
+  </div>
+</div>
+
+<!-- Skip info confirm sheet -->
+<div class="overlay" data-sheet="sheet-skip">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Skip details">
+    <div class="sheet__grip"></div>
+    <div class="sheet__header"><div><p class="sheet__title">Skip for now?</p></div><button class="btn btn--icon is-plain" data-close-sheet aria-label="Close"><svg class="icon"><use href="#ic-x"/></svg></button></div>
+    <div class="sheet__body"><p class="t-body">We’ll use sensible defaults for now — your headline, contact number and location. You can add or change any of this later from your website page.</p></div>
+    <div class="sheet__footer"><button class="btn btn--outline" data-close-sheet>Keep editing</button><button class="btn btn--primary" id="skipConfirm">Skip &amp; finish</button></div>
+  </div>
+</div>
+
+<!-- Leave setup confirm -->
+<div class="overlay" data-sheet="sheet-leave">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Leave setup">
+    <div class="sheet__grip"></div>
+    <div class="sheet__header"><div><p class="sheet__title">Leave setup?</p></div><button class="btn btn--icon is-plain" data-close-sheet aria-label="Close"><svg class="icon"><use href="#ic-x"/></svg></button></div>
+    <div class="sheet__body"><p class="t-body">Your address isn’t claimed yet, so nothing is saved. You can pick up where you left off from the Website page.</p></div>
+    <div class="sheet__footer"><button class="btn btn--outline" data-close-sheet>Stay</button><button class="btn btn--danger" id="leaveConfirm">Leave</button></div>
+  </div>
+</div>
+
+<!-- QR sheet -->
+<div class="overlay" data-sheet="sheet-qr">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="QR code">
+    <div class="sheet__grip"></div>
+    <div class="sheet__header"><div><p class="sheet__title">Your website QR code</p><p class="sheet__subtitle">Print it and stick it on your gate or notice board.</p></div><button class="btn btn--icon is-plain" data-close-sheet aria-label="Close"><svg class="icon"><use href="#ic-x"/></svg></button></div>
+    <div class="sheet__body">
+      <div class="qr"><div class="qr__code" id="qrCode"></div><p class="t-caption t-muted" id="qrUrl"></p></div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--outline" id="qrDownload"><svg class="icon"><use href="#ic-download"/></svg> Download</button>
+      <button class="btn btn--primary" id="qrShare"><svg class="icon"><use href="#ic-whatsapp"/></svg> Share</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit info sheet (steady state) -->
+<div class="overlay" data-sheet="sheet-editinfo">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Edit website information">
+    <div class="sheet__grip"></div>
+    <div class="sheet__header sheet__header--bordered"><div><p class="sheet__title">Website information</p><p class="sheet__subtitle">Property details come from your dashboard and can’t be edited here.</p></div><button class="btn btn--icon is-plain" data-close-sheet aria-label="Close"><svg class="icon"><use href="#ic-x"/></svg></button></div>
+    <div class="sheet__body stack stack--sm">
+      <div class="field"><label class="field__label" for="eHeadline">Headline</label><input class="input" id="eHeadline" type="text"></div>
+      <div class="field"><label class="field__label" for="eAbout">About</label><textarea class="input" id="eAbout" rows="3"></textarea></div>
+      <div class="field"><label class="field__label" for="ePhone">Contact number</label><input class="input" id="ePhone" type="tel"></div>
+      <div class="field"><label class="field__label" for="eEmail">Email</label><input class="input" id="eEmail" type="email"></div>
+      <div class="field"><label class="field__label" for="eOffice">Office address</label><input class="input" id="eOffice" type="text"></div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--outline" data-close-sheet>Cancel</button><button class="btn btn--primary" id="editInfoSave">Save</button></div>
+  </div>
+</div>
+
+<!-- Advanced info sheet -->
+<div class="overlay" data-sheet="sheet-advanced">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="About Advanced">
+    <div class="sheet__grip"></div>
+    <div class="sheet__header"><div><p class="sheet__title">Advanced</p></div><button class="btn btn--icon is-plain" data-close-sheet aria-label="Close"><svg class="icon"><use href="#ic-x"/></svg></button></div>
+    <div class="sheet__body stack stack--sm">
+      <p class="t-body">Everything in Basic, plus the parts that turn your site into a working front desk:</p>
+      <ul class="feature-list">
+        <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-calendar"/></svg></span><div><b>Visitors book their own visits</b><span>On the days and slots you allow.</span></div></li>
+        <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-eye"/></svg></span><div><b>Live bed availability</b><span>“3 beds free” — straight from your inventory.</span></div></li>
+        <li><span class="feature-list__ic"><svg class="icon"><use href="#ic-sparkles"/></svg></span><div><b>Your logo, colours &amp; extra pages</b><span>Make it properly yours.</span></div></li>
+      </ul>
+      <p class="t-caption t-muted">Pricing and upgrade flow are designed separately.</p>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--primary" data-close-sheet>Close</button></div>
+  </div>
+</div>
+
+<!-- ============================ DEV TOOLBAR ============================ -->
+<div class="dev" id="dev">
+  <button class="dev__toggle" id="devToggle" aria-label="Prototype controls"><svg class="icon"><use href="#ic-flask"/></svg></button>
+  <div class="dev__panel">
+    <h4>Screens</h4>
+    <div class="dev__screens" id="devScreens"></div>
+    <h4>ManagR state</h4>
+    <div class="dev__row"><span>Property approved</span><label class="switch"><input type="checkbox" data-state="approved"><span class="switch__track"></span></label></div>
+    <div class="dev__row"><span>Property published</span><label class="switch"><input type="checkbox" data-state="published"><span class="switch__track"></span></label></div>
+    <div class="dev__row"><span>Site live</span><label class="switch"><input type="checkbox" data-state="live"><span class="switch__track"></span></label></div>
+    <h4>Visitor site brand</h4>
+    <div class="dev__brand" id="devBrand"></div>
+    <button class="dev__reset" id="devReset">Reset prototype</button>
+    <p class="dev__note">Scaffolding only — not part of the BEDR design system. Simulates the dashboard data the builder reads.</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

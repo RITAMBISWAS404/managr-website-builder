@@ -1,0 +1,172 @@
+/* ============================================================================
+   BEDR — Design Tokens
+   Source of truth: BEDR-DESIGN-SYSTEM.md  ·  Foundation: BEDR-FOUNDATION.md
+   All values preserved from the Figma reference. Do not add values without a
+   documented requirement. Items marked (impl) are build utilities, not visual.
+   ========================================================================== */
+
+:root {
+  /* --- Colour: brand ----------------------------------------------------- */
+  --color-primary:            #F7553D;
+  --color-primary-strong:     #EF4444;
+  --color-primary-alt:        #FF5A3D;
+  --color-primary-progress:   #FB2C36;
+  --color-navy:               #001737;
+  --color-navy-ink:           #002F5D;
+  --color-navy-grad-from:     #002F5D;
+  --color-navy-grad-to:       #0F5584;
+  --color-cta-orange:         #FF6900;
+  --color-cta-orange-glow:    #FFD6A7;
+
+  /* --- Colour: neutral ramp (slate) ------------------------------------- */
+  --color-white:              #FFFFFF;
+  --color-n-50:               #F8FAFC;
+  --color-n-100:              #F1F5F9;
+  --color-n-150:              #E5E5E5;
+  --color-n-200:              #E2E8F0;
+  --color-n-300:              #CAD5E2;   /* reserved — unused */
+  --color-n-400:              #90A1B9;
+  --color-n-500:              #62748E;
+  --color-n-600:              #45556C;
+  --color-n-700:              #314158;
+  --color-n-800:              #1D293D;
+  --color-n-900:              #0F172B;
+  --color-ink:                #0A0A0A;
+  --color-placeholder:        rgba(10, 10, 10, 0.5);
+  --color-field-border:       #767676;
+
+  /* --- Colour: semantic ------------------------------------------------- */
+  --color-success-text:       #009966;
+  --color-success-solid:      #00BC7D;
+  --color-success-surface:    #ECFDF5;
+  --color-success-border:     #A4F4CF;
+
+  --color-warning-text:       #BB4D00;
+  --color-warning-surface:    #FFFBEB;
+  --color-warning-border:     #FEE685;
+
+  --color-info-solid:         #155DFC;
+  --color-info-selected:      #0075FF;
+
+  --color-purple-text:        #8200DB;
+
+  --color-danger:             #EF4444;
+  --color-danger-required:    #E7000B;
+
+  --color-banner-surface:     rgba(255, 247, 237, 0.5);
+  --color-banner-border:      #FFEDD4;
+
+  /* --- Colour: semantic aliases (components reference these) ------------ */
+  --text-heading:             var(--color-n-900);
+  --text-body:                var(--color-n-700);
+  --text-muted:               var(--color-n-500);
+  --text-subtle:              var(--color-n-400);
+  --text-on-primary:          var(--color-white);
+  --surface-page:             var(--color-white);
+  --surface-card:             var(--color-white);
+  --surface-subtle:           var(--color-n-50);
+
+  /* --- Typography ------------------------------------------------------- */
+  --font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --fw-regular:   400;
+  --fw-medium:    500;
+  --fw-semibold:  600;
+  --fw-bold:      700;
+
+  --fs-micro:     10px;
+  --fs-pill:      11px;
+  --fs-caption:   12px;
+  --fs-body:      14px;
+  --fs-section:   16px;
+  --fs-title:     18px;
+  --fs-display:   24px;
+
+  --lh-micro:     15px;
+  --lh-pill:      16.5px;
+  --lh-caption:   16px;
+  --lh-body:      20px;
+  --lh-section:   24px;
+  --lh-title:     28px;
+  --lh-display:   32px;
+
+  --ls-display:      -0.6px;
+  --ls-micro:        0.25px;
+  --ls-table-head:   0.6px;
+  --ls-normal:       0;
+
+  /* --- Spacing (Figma Spacing/*) -------------------------------------- */
+  --space-0:   4px;
+  --space-1:   8px;
+  --space-2:   10px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   40px;
+  --space-10:  64px;
+  --gap-icon:  6px;   /* in-button icon/label gap only */
+
+  /* --- Border radius ------------------------------------------------- */
+  --radius-xs:    2px;
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    10px;   /* default control radius */
+  --radius-xl:    14px;   /* cards */
+  --radius-2xl:   18px;   /* modals, banners */
+  --radius-full:  9999px;
+
+  /* --- Borders / strokes ------------------------------------------- */
+  --border-width:          0.8px;
+  --border-width-strong:   1px;
+  --border-width-tab:      1.6px;
+  --border-color:          var(--color-n-200);
+  --border-color-divider:  var(--color-n-100);
+  --border-color-table:    var(--color-n-150);
+  --border-color-field:    var(--color-field-border);
+  --border-color-active:   var(--color-primary-strong);
+  --border-color-selected: var(--color-info-selected);
+
+  /* --- Shadows ---------------------------------------------------- */
+  --shadow-xs:         0 1px 1px rgba(0, 0, 0, 0.05);
+  --shadow-sm:         0 1px 1.5px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.1);
+  --shadow-card:       0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-nav-active: 0 4px 3px rgba(0, 0, 0, 0.1), 0 2px 2px rgba(0, 0, 0, 0.1);
+  --shadow-modal:      0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inset:      inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  --glow-orange:       0 10px 7.5px var(--color-cta-orange-glow), 0 4px 3px var(--color-cta-orange-glow);
+  --blur-glass:        blur(12px);
+  --blur-glass-sm:     blur(8px);
+
+  /* --- Gradients / effects -------------------------------------- */
+  --gradient-navy: linear-gradient(90deg, var(--color-navy-grad-from), var(--color-navy-grad-to));
+  --gradient-card-tint: linear-gradient(152deg,
+      rgba(98, 116, 142, 0.12) 0%,
+      rgba(98, 116, 142, 0.06) 50%,
+      rgba(98, 116, 142, 0) 100%);
+  --scrim-image: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 50%);
+
+  /* --- Layout --------------------------------------------------- */
+  --sidebar-w-collapsed:  72px;
+  --sidebar-w:            204px;   /* inferred — confirm (Gap) */
+  --header-h:             64px;
+  --page-gutter:          24px;
+  --content-pad-top:      20px;
+  --card-gap:             16px;
+  --section-gap:          24px;
+  --content-max:          1464px;
+
+  /* --- Implementation utilities (not from Figma) --------------- */
+  --z-base:      0;
+  --z-sticky:    100;
+  --z-dropdown:  1000;
+  --z-overlay:   1100;
+  --z-modal:     1200;
+  --z-toast:     1300;
+
+  --transition-fast:  120ms ease;
+  --transition:       180ms ease;
+
+  --overlay-backdrop: rgba(15, 23, 43, 0.5);   /* working default — exact value is a Gap */
+  --focus-ring:       0 0 0 2px var(--color-info-selected);   /* placeholder — states are a Gap */
+}
