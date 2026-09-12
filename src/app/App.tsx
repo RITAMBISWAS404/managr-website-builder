@@ -15,6 +15,7 @@ import { SettingsScreen } from "@/features/settings/SettingsScreen";
 import { ScheduledVisitsScreen } from "@/features/visits/ScheduledVisitsScreen";
 import { EditorScreen } from "@/features/editor/EditorScreen";
 import { VisitorSite } from "@/features/visitor/VisitorSite";
+import { DesignLabPage } from "@/features/design-lab/DesignLabPage";
 
 export function App() {
   return (
@@ -25,6 +26,8 @@ export function App() {
         {/* full-screen surfaces (no ManagR shell) */}
         <Route path="/website/editor" element={<EditorScreen />} />
         <Route path="/website/preview" element={<VisitorSite />} />
+        {/* PASS 1 design exploration — isolated, additive, not linked from any nav */}
+        <Route path="/design-lab" element={<DesignLabPage />} />
 
         {/* everything else lives inside the ManagR shell */}
         <Route element={<ManagRShell />}>

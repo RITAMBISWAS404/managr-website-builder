@@ -1,18 +1,14 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowUp, ArrowDown, Eye, EyeOff, Copy, Trash2, GripVertical, Plus, MoreHorizontal, ChevronLeft, Search, Sparkles,
-  Image as ImageIconLg, Lock,
+  ArrowUp, ArrowDown, GripVertical, Plus, ChevronLeft, Search, Sparkles,
+  Image as ImageIconLg,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Hint } from "@/components/ui/tooltip";
 import { Notice } from "@/components/common";
 import { toast } from "@/components/ui/sonner";
-import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { useS, useDispatch, useDerived } from "@/store/hooks";
 import { SECTIONS, ADD_CATEGORIES } from "@/features/sections/registry";
 import { structureLocked, sectionLocked, needsData } from "@/store/selectors";
@@ -32,6 +28,25 @@ const TINT_FG: Record<Tint, string> = {
   cyan: "text-tint-cyan-fg",
 };
 
+/** A sub-view's header: back control on the LEFT, then the heading —
+ *  conventional drill-down order (Page structure → Add a section), not the
+ *  heading-then-back-on-the-right layout that read backwards. */
+function BackHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  return (
+    <div className="flex h-12 shrink-0 items-center gap-1 border-b border-panel-border bg-panel-header px-2">
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label="Back to sections"
+        className="grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-panel-hover hover:text-foreground"
+      >
+        <ChevronLeft className="size-4" />
+      </button>
+      <span className="truncate text-sm font-semibold text-foreground">{title}</span>
+    </div>
+  );
+}
+
 export function LeftPanel() {
   const s = useS();
   if (s.leftMode === "pages") return <PagesPanel />;
@@ -49,9 +64,6 @@ export function LayersPanel() {
   const { page } = useDerived();
   const locked = structureLocked(s);
   const rows = page.blocks.map((b, i) => ({ b, i }));
-  const body = rows.filter((x) => !SECTIONS[x.b.type].structural);
-  const header = rows.find((x) => x.b.type === "header");
-  const footer = rows.find((x) => x.b.type === "footer");
 
   const [dragI, setDragI] = React.useState<number | null>(null);
   const [overI, setOverI] = React.useState<number | null>(null);
@@ -72,12 +84,13 @@ export function LayersPanel() {
     setOverI(null);
   };
 
-  // One continuous structure — header pinned at the top, footer pinned at the
-  // bottom, everything else reorderable in between. This page is the whole
-  // site today; header/footer are shared across every page it ever grows to.
+  // Every block — header, footer, everything between — is one uniform list.
+  // Header/footer still can't be reordered or removed (NavRow's `canStruct`
+  // guards that per-row), but nothing here visually singles them out as a
+  // different kind of thing: same heading, same rows, no dividers.
   return (
     <Panel>
-      <PanelHeader title="Sections" meta={`${page.blocks.filter((b) => !b.hidden).length} showing`} />
+      <PanelHeader title="Page structure" meta={`${rows.length} section${rows.length === 1 ? "" : "s"}`} />
       <PanelScroll>
         {locked && (
           <div className="px-3 pt-3">
@@ -88,41 +101,21 @@ export function LayersPanel() {
           </div>
         )}
 
-        <Group label="Page structure" collapsible={false} bodyClassName="p-2">
-          {header && <NavRow key={header.b.id} block={header.b} index={header.i} pinned="top" />}
-
-          <div className="my-1 flex items-center gap-2 px-1.5">
-            <span className="text-micro font-semibold uppercase tracking-[0.05em] text-faint">Sections</span>
-            <span className="h-px flex-1 bg-panel-border" />
-          </div>
-          <div onDragOver={(e) => e.preventDefault()}>
-            {body.map((x) => (
-              <NavRow
-                key={x.b.id}
-                block={x.b}
-                index={x.i}
-                draggable={!locked}
-                dragging={dragI === x.i}
-                dropBefore={overI === x.i && dragI != null && dragI !== x.i}
-                onDragStart={() => { dragRef.current = x.i; setDragI(x.i); }}
-                onDragEnter={() => { overRef.current = x.i; setOverI(x.i); }}
-                onDragEnd={onDrop}
-              />
-            ))}
-          </div>
-
-          {footer && (
-            <>
-              <div className="my-1 h-px bg-panel-border" />
-              <NavRow key={footer.b.id} block={footer.b} index={footer.i} pinned="bottom" />
-            </>
-          )}
-        </Group>
-
-        <p className="px-3.5 pb-3 text-caption leading-snug text-muted-foreground">
-          Header and footer are fixed in place and shared everywhere this site is shown — editing one changes it
-          everywhere.
-        </p>
+        <div className="space-y-0.5 p-2" onDragOver={(e) => e.preventDefault()}>
+          {rows.map((x) => (
+            <NavRow
+              key={x.b.id}
+              block={x.b}
+              index={x.i}
+              draggable={!locked && !SECTIONS[x.b.type].structural}
+              dragging={dragI === x.i}
+              dropBefore={overI === x.i && dragI != null && dragI !== x.i}
+              onDragStart={() => { dragRef.current = x.i; setDragI(x.i); }}
+              onDragEnter={() => { overRef.current = x.i; setOverI(x.i); }}
+              onDragEnd={onDrop}
+            />
+          ))}
+        </div>
       </PanelScroll>
 
       {!locked && (
@@ -145,7 +138,6 @@ function NavRow({
   onDragStart,
   onDragEnter,
   onDragEnd,
-  pinned,
 }: {
   block: Block;
   index: number;
@@ -155,8 +147,6 @@ function NavRow({
   onDragStart?: () => void;
   onDragEnter?: () => void;
   onDragEnd?: () => void;
-  /** header/footer: fixed in place, shown with a lock instead of a drag handle */
-  pinned?: "top" | "bottom";
 }) {
   const s = useS();
   const dispatch = useDispatch();
@@ -188,69 +178,51 @@ function NavRow({
         if (canStruct && e.altKey && e.key === "ArrowDown") { e.preventDefault(); dispatch({ type: "moveBlock", index, dir: 1 }); }
       }}
       className={cn(
-        "group relative flex items-center gap-2.5 rounded-lg py-2 pl-2 pr-1 text-body outline-none transition-colors",
-        selected ? "bg-brand/[0.09] font-medium text-foreground" : "hover:bg-panel-hover",
+        // Fixed row height, always — selection/hover only ever change colour,
+        // never geometry. A border is always reserved (transparent when
+        // unselected), so turning it orange never nudges the row's size —
+        // one system with the selected layout cards below: selection =
+        // a border, never a fill, never a stripe.
+        "group relative flex h-9 items-center gap-2.5 rounded-lg border pl-2 pr-1.5 text-body transition-colors",
+        // Keyboard focus is its own, separate signal from selection — a
+        // ring, shown only while tabbed to, on top of whatever the
+        // selected/unselected border already is.
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/60",
+        selected ? "border-brand font-medium text-foreground" : "border-transparent hover:bg-panel-hover",
         meta.structural && !selected && "text-muted-foreground",
         dragging && "opacity-40",
       )}
     >
       {dropBefore && <span className="absolute inset-x-1.5 -top-px h-0.5 rounded-full bg-brand" />}
 
-      {pinned ? (
-        <Hint label={pinned === "top" ? "Fixed at the top of every page" : "Fixed at the bottom of every page"}>
-          <Lock className="size-3.5 shrink-0 text-faint" />
-        </Hint>
-      ) : (
-        <GripVertical
-          className={cn(
-            "size-3.5 shrink-0 transition-opacity",
-            draggable ? "cursor-grab text-faint opacity-0 group-hover:opacity-100" : "text-transparent",
-            selected && draggable && "opacity-100",
-          )}
-        />
-      )}
+      <GripVertical
+        className={cn(
+          "size-3.5 shrink-0 transition-opacity",
+          draggable ? "cursor-grab text-faint opacity-0 group-hover:opacity-100" : "text-transparent",
+          selected && draggable && "opacity-100",
+        )}
+      />
       <meta.icon
         className={cn("size-4 shrink-0", meta.structural ? "text-muted-foreground" : TINT_FG[tint])}
       />
-      <span className={cn("flex-1 truncate font-medium", block.hidden && "text-muted-foreground/70 line-through")}>
+      <span className={cn("min-w-0 flex-1 truncate font-medium", block.hidden && "text-muted-foreground/70 line-through")}>
         {meta.name}
       </span>
 
-      {pinned && <span className="shrink-0 text-caption text-muted-foreground/70">Fixed</span>}
-
-      {!pinned && (block.hidden ? (
+      {block.hidden ? (
         <span className="shrink-0 text-caption text-muted-foreground/70">Hidden</span>
       ) : locked ? (
         <Badge variant="advanced"><Sparkles /> Advanced</Badge>
       ) : nd ? (
         <Badge variant="warning">Needs data</Badge>
-      ) : null)}
+      ) : null}
 
       {canStruct ? (
+        // Reorder only — hide/duplicate/remove now live in the right
+        // inspector once a section is selected, not in a row-level menu.
         <span className={cn("shrink-0 items-center gap-0.5", selected ? "flex" : "hidden group-hover:flex")}>
           <IconBtn onClick={act(() => dispatch({ type: "moveBlock", index, dir: -1 }), "Moved up")} label="Move up"><ArrowUp /></IconBtn>
           <IconBtn onClick={act(() => dispatch({ type: "moveBlock", index, dir: 1 }), "Moved down")} label="Move down"><ArrowDown /></IconBtn>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button onClick={(e) => e.stopPropagation()} aria-label="More actions" className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-surface [&_svg]:size-3.5">
-                <MoreHorizontal />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => { dispatch({ type: "hideBlock", index }); toast(block.hidden ? "Section shown" : "Section hidden — still in your list"); }}>
-                {block.hidden ? <Eye /> : <EyeOff />} {block.hidden ? "Show on website" : "Hide from website"}
-              </DropdownMenuItem>
-              {meta.dup && (
-                <DropdownMenuItem onClick={() => { dispatch({ type: "dupBlock", index }); toast(`${meta.name} duplicated`); }}>
-                  <Copy /> Duplicate
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem destructive onClick={() => { dispatch({ type: "removeBlock", index }); toast(`${meta.name} removed`, { action: { label: "Undo", onClick: () => {} } }); }}>
-                <Trash2 /> Remove section
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </span>
       ) : (
         !meta.structural && block.global && <span className="shrink-0 text-caption text-muted-foreground/70">Every page</span>
@@ -346,17 +318,12 @@ export function AddPanel() {
   const dispatch = useDispatch();
   const { advActive, page } = useDerived();
   const [q, setQ] = React.useState("");
-
-  const back = (
-    <Button variant="ghost" size="sm" onClick={() => dispatch({ type: "leftMode", mode: "layers" })}>
-      <ChevronLeft /> Sections
-    </Button>
-  );
+  const goBack = () => dispatch({ type: "leftMode", mode: "layers" });
 
   if (structureLocked(s))
     return (
       <Panel>
-        <PanelHeader title="Add a section" actions={back} />
+        <BackHeader title="Add a section" onBack={goBack} />
         <PanelScroll>
           <div className="px-3 py-3">
             <Notice tone="advanced">
@@ -377,7 +344,7 @@ export function AddPanel() {
 
   return (
     <Panel>
-      <PanelHeader title="Add a section" actions={back} />
+      <BackHeader title="Add a section" onBack={goBack} />
       <PanelScroll>
         <div className="border-b border-panel-border bg-panel-header px-3 py-2.5">
           <div className="relative">
@@ -446,10 +413,11 @@ export function AddPanel() {
    Photos
    ========================================================================== */
 export function AssetsPanel() {
+  const dispatch = useDispatch();
   const { advActive, publicProperties } = useDerived();
   return (
     <Panel>
-      <PanelHeader title="Photos" />
+      <BackHeader title="Photos" onBack={() => dispatch({ type: "leftMode", mode: "layers" })} />
       <PanelScroll>
         {/* photos are secondary here — this is a light reference view, not a
             primary editing surface. Real thumbnails aren't modelled yet, so we

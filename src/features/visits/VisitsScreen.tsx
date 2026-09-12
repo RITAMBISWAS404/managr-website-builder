@@ -103,7 +103,7 @@ export function VisitsScreen() {
   };
 
   return (
-    <Page>
+    <Page size="wide">
       <PageHead
         title="Visit settings"
         description="Your scheduling control centre. The common case is two steps — pick days, pick times."
@@ -130,7 +130,7 @@ export function VisitsScreen() {
             <div
               role="group"
               aria-label="Days and parts of day visitors can book"
-              className="grid max-w-[400px] grid-cols-[40px_repeat(3,1fr)] gap-1.5 text-caption"
+              className="grid max-w-[620px] grid-cols-[64px_repeat(3,1fr)] gap-2 text-caption"
             >
               <span />
               {SLOTS.map((slot) => (
@@ -151,7 +151,7 @@ export function VisitsScreen() {
                         aria-label={`${DAYS[i]} ${slot} ${on ? "on" : "off"}`}
                         onClick={() => setGrid((g) => ({ ...g, [key(i, slot)]: !g[key(i, slot)] }))}
                         className={cn(
-                          "min-h-[38px] rounded-lg text-pill font-semibold transition-colors",
+                          "min-h-[42px] rounded-lg text-sm font-semibold transition-colors",
                           on
                             ? "bg-brand text-primary-foreground"
                             : "bg-sunken text-faint hover:bg-[#e9ebef]",
@@ -177,7 +177,7 @@ export function VisitsScreen() {
                   className={cn(
                     "rounded-full border px-3 py-1 text-caption transition-colors",
                     times[t]
-                      ? "border-brand bg-brand/[0.06] font-semibold text-foreground"
+                      ? "border-brand bg-tint-coral font-semibold text-foreground"
                       : "border-border-subtle font-medium text-muted-foreground hover:bg-surface-2",
                   )}
                 >

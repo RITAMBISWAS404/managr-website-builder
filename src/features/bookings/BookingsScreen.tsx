@@ -99,7 +99,7 @@ export function BookingsScreen() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Keep it open</AlertDialogCancel>
                       <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="bg-destructive text-destructive-foreground hover:brightness-90"
                         onClick={() => toast("Declined — the visitor is notified with your reason")}
                       >
                         Decline request

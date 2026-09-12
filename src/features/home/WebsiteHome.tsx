@@ -95,7 +95,7 @@ export function WebsiteHome() {
 
       {/* ================= one thing to do next ================= */}
       {next && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-brand/25 bg-surface p-4 shadow-e1 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex flex-col gap-3 rounded-2xl border border-ring-soft bg-surface p-4 shadow-e1 sm:flex-row sm:items-center sm:gap-4">
           <IconTile icon={next.icon} tint={next.tint} size="lg" className="shadow-xs" />
           <div className="min-w-0 flex-1">
             <div className="text-micro font-bold uppercase tracking-[0.07em] text-brand">Next</div>
@@ -113,7 +113,7 @@ export function WebsiteHome() {
         <SectionHeader>Your website</SectionHeader>
         <Card className="overflow-hidden">
           {/* region 1 — the website itself + its live state */}
-          <div className="p-5">
+          <div className="p-6">
             <div className="flex items-center gap-4">
               <IconTile icon={<Globe />} tint="blue" size="lg" />
               <div className="min-w-0 flex-1">
@@ -191,7 +191,7 @@ export function WebsiteHome() {
       {/* ================= this week ================= */}
       <section>
         <SectionHeader action={<SectionLink to="/website/analytics">See more</SectionLink>}>This week</SectionHeader>
-        <div className={cn("grid grid-cols-2 gap-2.5 sm:grid-cols-3", advActive && "xl:grid-cols-5")}>
+        <div className={cn("grid grid-cols-2 gap-3 sm:grid-cols-3", advActive && "xl:grid-cols-5")}>
           <MetricCard tint="blue" icon={<Eye />} value="8" label="Visitors" />
           <MetricCard tint="green" icon={<MessageCircle />} value="3" label="WhatsApp chats" />
           <MetricCard tint="cyan" icon={<PhoneCall />} value="2" label="Calls" />
@@ -203,7 +203,7 @@ export function WebsiteHome() {
       {/* ================= manage ================= */}
       <section>
         <SectionHeader>Manage</SectionHeader>
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
           {manage.map((m) => (
             <Link
               key={m.to}
@@ -266,7 +266,7 @@ function FactCell({
   attention?: boolean;
 }) {
   return (
-    <div className={cn("min-w-0 px-5 py-4", attention && "bg-warning-wash")}>
+    <div className={cn("min-w-0 bg-surface-2 px-6 py-4", attention && "bg-warning-wash")}>
       <div className="text-micro font-bold uppercase tracking-[0.06em] text-faint">{label}</div>
       <div className="mt-1.5 min-w-0 text-sm">{children}</div>
       {action && <div className="mt-2">{action}</div>}

@@ -81,10 +81,26 @@
   --accent-foreground: #111111;
 
   --input: #dcdcdc;
-  --ring: #f7553d;
+  /* An R G B channel triplet (no rgb() wrapper) — the one color token in
+     this file written this way on purpose. Every `ring-ring/NN` in the app
+     (Button, Input, Checkbox, Dialog…) already assumed Tailwind could
+     alpha-blend it; that only works when the token is a channel tuple
+     consumed as `rgb(var(--ring) / <alpha-value>)`, never a plain hex
+     string. It was `#f7553d` — same color, wrong format — and every one of
+     those `/NN` focus rings was silently rendering with NO ring at all.
+     See the `--brand-ring-soft` / `bg-tint-coral` notes for the same root
+     cause elsewhere in this file. Direct CSS use below wraps it in rgb(). */
+  --ring: 247 85 61;
+  /* A ~20%-brand-over-white mix, precomputed as a solid colour — `--brand`
+     itself stays a plain hex (nothing else needs it alpha-blended), so this
+     is the one-off token for the canvas hover ring, lighter than the solid
+     selected-state ring. */
+  --brand-ring-soft: #fdddd8;
 
   --destructive: #d33a29;
   --destructive-foreground: #ffffff;
+  --destructive-surface: #fbe8e6;
+  --destructive-border: #f0b3ab;
 
   --success: #00875a;
   --success-foreground: #ffffff;
@@ -161,7 +177,7 @@ h1, h2, h3, h4 {
 }
 
 :focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid rgb(var(--ring));
   outline-offset: 2px;
   border-radius: 4px;
 }

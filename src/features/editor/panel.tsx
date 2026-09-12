@@ -273,26 +273,26 @@ export function ChoiceCard({
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
+        // One selection language, shared with the left panel's section
+        // rows: selected = an orange border, nothing else. Same card
+        // surface either way — no fill, no tint, no ring. Keyboard focus
+        // is unaffected here (no `outline-none` on this button), so the
+        // global `:focus-visible` outline still shows independently while
+        // tabbing, same as everywhere else in the app.
         "group flex flex-col gap-2 rounded-lg border p-2 text-left transition-colors disabled:opacity-45",
         selected
-          ? "border-brand bg-brand/[0.05] ring-1 ring-inset ring-brand/20"
+          ? "border-brand bg-surface-2"
           : "border-border-subtle bg-surface-2 hover:border-border hover:bg-panel-hover",
       )}
     >
       {preview != null && (
-        <span
-          className={cn(
-            "grid h-12 place-items-center overflow-hidden rounded-md border bg-white",
-            selected ? "border-brand/25" : "border-border-subtle",
-          )}
-        >
+        <span className="grid h-12 place-items-center overflow-hidden rounded-md border border-border-subtle bg-white">
           {preview}
         </span>
       )}
-      <span className="flex items-center justify-between gap-1 px-0.5 text-caption font-medium text-foreground">
-        {label}
-        {selected && <span className="size-1.5 shrink-0 rounded-full bg-brand" />}
-      </span>
+      {/* Border is the only selected signal now — same language as the left
+          panel's section rows. No dot, no fill: one system. */}
+      <span className="text-caption font-medium text-foreground">{label}</span>
     </button>
   );
 }

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FromManagR } from "@/components/common";
 import { cn } from "@/lib/utils";
+import { useDispatch } from "@/store/hooks";
 
 /* compact field label — matches the editor panel language (12px) */
 function FLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
@@ -43,6 +44,7 @@ export function InspectorField({
   options?: (key: string) => string[] | undefined;
 }) {
   const nav = useNavigate();
+  const dispatch = useDispatch();
   const val = (k: string) => (data[k] as string) ?? "";
 
   switch (field.kind) {
@@ -118,7 +120,16 @@ export function InspectorField({
       return <FromManagR where={field.where} />;
     case "action":
       return (
-        <Button variant="outline" size="sm" className="w-full" onClick={() => nav(`/website/${field.go === "assets" ? "editor" : field.go}`)}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={() =>
+            field.go === "assets"
+              ? dispatch({ type: "leftMode", mode: "assets" })
+              : nav(`/website/${field.go}`)
+          }
+        >
           {field.icon === "calendar" && <CalendarDays />} {field.label} →
         </Button>
       );

@@ -18,7 +18,7 @@ export default {
       colors: {
         border: { DEFAULT: "var(--border)", subtle: "var(--border-subtle)", strong: "var(--border-strong)" },
         input: "var(--input)",
-        ring: "var(--ring)",
+        ring: { DEFAULT: "rgb(var(--ring) / <alpha-value>)", soft: "var(--brand-ring-soft)" },
         background: "var(--background)",
         workspace: "var(--workspace)",
         overlay: "var(--overlay)",
@@ -52,7 +52,7 @@ export default {
         accent: { DEFAULT: "var(--accent)", foreground: "var(--accent-foreground)" },
         card: { DEFAULT: "var(--card)", foreground: "var(--card-foreground)" },
         popover: { DEFAULT: "var(--popover)", foreground: "var(--popover-foreground)" },
-        destructive: { DEFAULT: "var(--destructive)", foreground: "var(--destructive-foreground)" },
+        destructive: { DEFAULT: "var(--destructive)", foreground: "var(--destructive-foreground)", surface: "var(--destructive-surface)", border: "var(--destructive-border)" },
         call: "var(--call)",
         whatsapp: "var(--whatsapp)",
         success: { DEFAULT: "var(--success)", foreground: "var(--success-foreground)", surface: "var(--success-surface)", border: "var(--success-border)" },

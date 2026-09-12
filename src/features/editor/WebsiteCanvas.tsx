@@ -12,7 +12,11 @@ import { SiteSection, SectionPlaceholder, hasPlaceholder } from "@/features/sect
 import { structureLocked, siteUrl } from "@/store/selectors";
 
 const FRAME_W = { desktop: "lg:max-w-[1200px]", tablet: "lg:max-w-[760px]", mobile: "lg:max-w-[404px]" };
-const DENSE = { comfortable: "px-6 py-7", compact: "px-6 py-4", roomy: "px-6 py-10" };
+// Section rhythm is now a single global Design choice (Style → Spacing),
+// not a per-section control — `block.dense` predates that and is frozen at
+// its initial value for every block (nothing writes to it any more), so the
+// real, live setting to read here is `s.layoutDensity`.
+const GLOBAL_DENSE = { balanced: "px-6 py-7", spacious: "px-6 py-10", compact: "px-6 py-4" };
 
 export function WebsiteCanvas() {
   const s = useS();
@@ -76,9 +80,9 @@ export function WebsiteCanvas() {
                   onClick={() => s.editMode && dispatch({ type: "select", block: selected ? null : i })}
                   className={cn(
                     "group relative border-b border-border-subtle transition-[box-shadow,opacity] duration-100 last:border-b-0",
-                    DENSE[b.dense],
+                    GLOBAL_DENSE[s.layoutDensity] ?? GLOBAL_DENSE.balanced,
                     s.editMode && "cursor-pointer",
-                    s.editMode && !selected && "hover:ring-1 hover:ring-inset hover:ring-brand/20",
+                    s.editMode && !selected && "hover:ring-1 hover:ring-inset hover:ring-ring-soft",
                     selected && "ring-[1.5px] ring-inset ring-brand",
                     (b.hidden || bpHidden) && s.editMode && "opacity-45",
                   )}

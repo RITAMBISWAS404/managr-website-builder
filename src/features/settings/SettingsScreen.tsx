@@ -8,7 +8,6 @@ import {
   Field,
   FieldGroup,
   ToggleField,
-  Callout,
   AdvancedLock,
   SaveBar,
   useSaveState,
@@ -28,7 +27,7 @@ export function SettingsScreen() {
   const { state, markDirty, save, reset } = useSaveState();
 
   return (
-    <Page>
+    <Page size="full">
       <PageHead
         title="Website settings"
         description="Your address, brand, menu and contact details — grouped so you only open what you need."
@@ -43,7 +42,7 @@ export function SettingsScreen() {
             title="Address & language"
             description="How your site is named and reached. The web address is fixed once your site goes live."
           >
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid max-w-[820px] gap-4 sm:grid-cols-2">
               <Field label="Business name shown on the site" htmlFor="biz">
                 <Input id="biz" defaultValue={OWNER.biz} />
               </Field>
@@ -65,7 +64,7 @@ export function SettingsScreen() {
               </Field>
             </div>
 
-            <Field label="Your web address" hint="Set for good — it goes on your boards and into WhatsApp groups.">
+            <Field label="Your web address" hint="Set for good — it goes on your boards and into WhatsApp groups." className="max-w-[820px]">
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface-2 px-3.5 py-2.5">
                 <span className="flex items-center gap-1.5 font-mono text-sm text-foreground">
                   <Lock className="size-3.5 text-faint" /> {url}
@@ -88,11 +87,11 @@ export function SettingsScreen() {
             }
           >
             <Field label="Links in the menu">
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-3">
                 {MENU_LINKS.map((l, i) => (
                   <label
                     key={l}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-2.5 text-body transition-colors has-[[data-state=checked]]:border-brand has-[[data-state=checked]]:bg-brand/[0.04]"
+                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-2.5 text-body transition-colors has-[[data-state=checked]]:border-brand has-[[data-state=checked]]:bg-tint-coral"
                   >
                     <Checkbox defaultChecked={i < 3} onCheckedChange={markDirty} /> {l}
                   </label>
@@ -118,7 +117,7 @@ export function SettingsScreen() {
             title="Contact details"
             description="Shown in your footer and used by the Call and WhatsApp buttons. An area only — never a property's exact address."
           >
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid max-w-[820px] gap-4 sm:grid-cols-2">
               <Field label="Phone" htmlFor="phone">
                 <Input id="phone" defaultValue={OWNER.phone} />
               </Field>
@@ -140,7 +139,7 @@ export function SettingsScreen() {
             title="Social links"
             description="Optional. Any you fill in appear as icons in the footer."
           >
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               {["Instagram", "Facebook", "YouTube"].map((l) => (
                 <Field key={l} label={l}>
                   <Input placeholder="Paste the link" />

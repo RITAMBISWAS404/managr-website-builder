@@ -53,7 +53,7 @@ export function EnquiriesScreen() {
   );
 
   return (
-    <Page>
+    <Page size="full">
       <PageHead title="Enquiries" description="Leads that came from your website — manage them here or in your CRM." />
 
       <PageBody>

@@ -1,23 +1,28 @@
 import * as React from "react";
-import { EyeOff, Eye, Trash2, X, MoreHorizontal, Copy, Globe, MapPin, ChevronDown, Link2 } from "lucide-react";
+import { EyeOff, Eye, Trash2, Copy, X, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Hint } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { BoundField, AdvancedLock, Notice, IconTile } from "@/components/common";
+import { DataSource, DataCard, AdvancedLock, Notice, IconTile } from "@/components/common";
 import { toast } from "@/components/ui/sonner";
 import { useS, useDispatch, useDerived } from "@/store/hooks";
-import { SECTIONS, type Field } from "@/features/sections/registry";
+import { SECTIONS } from "@/features/sections/registry";
 import { InspectorField } from "./primitives";
 import {
-  Panel, PanelHeader, PanelScroll, Group, Row, Seg, SegToggles, ChoiceGrid, ChoiceCard, LayoutMini, ScopeChip,
+  Panel, PanelHeader, PanelScroll, Group, ChoiceGrid, ChoiceCard, LayoutMini, ScopeChip,
   SECTION_TINT,
 } from "@/features/editor/panel";
-import type { Device, Property } from "@/types";
+import type { Property } from "@/types";
 import { sectionLocked, needsData } from "@/store/selectors";
 
-/* which groups are open — remembered for the session (not persisted) */
-const openState = { content: true, layout: true, visibility: true, data: false };
+/* Only a few `where` locations actually resolve to a real screen in this
+   app — ManagR itself (Properties, Tenants) isn't part of this codebase.
+   Never point an action at a destination that doesn't exist. */
+const MANAGR_ACTION: Record<string, { href: string; label: string }> = {
+  "Website settings → Contact": { href: "/website/settings", label: "Edit in ManagR →" },
+  "Live availability": { href: "/website/availability", label: "Set up live availability →" },
+};
 
 type OptionFn = (key: string) => string[] | undefined;
 const makeOptions = (type: string, pubs: Property[]): OptionFn => (key) => {
@@ -32,9 +37,6 @@ export function InspectorPanel({ mobile = false, onClose }: { mobile?: boolean; 
   const s = useS();
   const dispatch = useDispatch();
   const { page, publicProperties } = useDerived();
-  const [, force] = React.useReducer((x) => x + 1, 0);
-  const [moreLayout, setMoreLayout] = React.useState(false);
-  const setOpen = (k: keyof typeof openState) => (o: boolean) => { openState[k] = o; force(); };
   const sel = s.selection?.block ?? null;
   const close = () => (onClose ? onClose() : dispatch({ type: "select", block: null }));
 
@@ -76,7 +78,7 @@ export function InspectorPanel({ mobile = false, onClose }: { mobile?: boolean; 
 
   const options = makeOptions(block.type, publicProperties);
   const onChange = (key: string, value: unknown) => dispatch({ type: "updateBlockData", index: sel, key, value });
-  const hasContent = meta.content.primary.length > 0 || !!meta.content.more;
+  const hasContent = meta.content.primary.length > 0 || !!meta.content.groups?.length;
   const variants = meta.layoutVariants.length > 1 ? meta.layoutVariants : [];
   const curLayout = meta.layoutVariants.includes(block.layout) ? block.layout : meta.layoutVariants[0];
 
@@ -84,7 +86,7 @@ export function InspectorPanel({ mobile = false, onClose }: { mobile?: boolean; 
 
   return (
     <Panel>
-      <div className="flex shrink-0 items-start gap-3 border-b border-panel-border bg-panel-header px-3.5 py-3">
+      <div className="flex h-[60px] shrink-0 items-center gap-3 border-b border-panel-border bg-panel-header px-3.5">
         {meta.structural ? (
           <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-sunken text-faint">
             <meta.icon className="size-[18px]" />
@@ -92,70 +94,84 @@ export function InspectorPanel({ mobile = false, onClose }: { mobile?: boolean; 
         ) : (
           <IconTile icon={<meta.icon />} tint={tint} size="md" />
         )}
-        <div className="min-w-0 flex-1 pt-0.5">
+        <div className="min-w-0 flex-1 leading-tight">
           <div className="truncate text-body font-bold text-foreground">{meta.name}</div>
-          <div className="mt-0.5 truncate text-caption text-faint">{meta.category}</div>
+          <div className="mt-[3px] truncate text-caption text-faint">{meta.category}</div>
         </div>
-        <div className="flex shrink-0 items-center gap-0.5 pt-0.5">
-          <Button
-            variant="ghost" size="icon-sm"
-            aria-label={block.hidden ? "Show on website" : "Hide from website"}
-            className={block.hidden ? "text-warning" : ""}
-            onClick={() => { dispatch({ type: "hideBlock", index: sel }); toast(block.hidden ? "Section shown" : "Section hidden — still in your list"); }}
-          >
-            {block.hidden ? <EyeOff /> : <Eye />}
-          </Button>
-          {(!meta.structural || meta.dup) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="More actions"><MoreHorizontal /></Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {meta.dup && (
-                  <DropdownMenuItem onClick={() => { dispatch({ type: "dupBlock", index: sel }); toast(`${meta.name} duplicated`); }}>
-                    <Copy /> Duplicate
-                  </DropdownMenuItem>
-                )}
-                {!meta.structural && (
-                  <>
-                    {meta.dup && <DropdownMenuSeparator />}
-                    <DropdownMenuItem destructive onClick={() => { dispatch({ type: "removeBlock", index: sel }); toast(`${meta.name} removed`); }}>
-                      <Trash2 /> Remove section
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <div className="flex shrink-0 items-center gap-0.5">
+          {/* Every action here is explicit and does something real — no
+              overflow menu hiding Duplicate/Remove behind a "...". */}
+          <Hint label={block.hidden ? "Show on website" : "Hide from website"}>
+            <Button
+              variant="ghost" size="icon-sm"
+              aria-label={block.hidden ? "Show on website" : "Hide from website"}
+              className={block.hidden ? "text-warning" : ""}
+              onClick={() => { dispatch({ type: "hideBlock", index: sel }); toast(block.hidden ? "Section shown" : "Section hidden — still in your list"); }}
+            >
+              {block.hidden ? <EyeOff /> : <Eye />}
+            </Button>
+          </Hint>
+          {meta.dup && (
+            <Hint label="Duplicate section">
+              <Button
+                variant="ghost" size="icon-sm" aria-label="Duplicate section"
+                onClick={() => { dispatch({ type: "dupBlock", index: sel }); toast(`${meta.name} duplicated`); }}
+              >
+                <Copy />
+              </Button>
+            </Hint>
           )}
-          <Button variant="ghost" size="icon-sm" aria-label={mobile ? "Close" : "Deselect"} onClick={close}><X /></Button>
+          {!meta.structural && (
+            <Hint label="Remove section">
+              <Button
+                variant="ghost" size="icon-sm" aria-label="Remove section"
+                className="text-destructive hover:bg-destructive-surface"
+                onClick={() => { dispatch({ type: "removeBlock", index: sel }); toast(`${meta.name} removed`); }}
+              >
+                <Trash2 />
+              </Button>
+            </Hint>
+          )}
+          <span className="mx-0.5 h-5 w-px bg-border-subtle" />
+          <Hint label={mobile ? "Close" : "Deselect this section"}>
+            <Button variant="ghost" size="icon-sm" aria-label={mobile ? "Close" : "Deselect"} onClick={close}><X /></Button>
+          </Hint>
         </div>
       </div>
 
-      {block.global ? (
+      {/* Only worth saying when it's non-obvious: a header/footer edit applies
+          everywhere. Which page a regular section is on is not useful
+          information in the common single-page site — omitted. */}
+      {block.global && (
         <ScopeChip icon={<Globe />}>
           <span className="font-medium text-foreground">Global</span> — on every page, changes apply everywhere
-        </ScopeChip>
-      ) : (
-        <ScopeChip icon={<MapPin />}>
-          On the <span className="font-medium text-foreground">{page.name}</span> page
         </ScopeChip>
       )}
 
       <PanelScroll>
         {hasContent && (
-          <Group label="Content" open={openState.content} onOpenChange={setOpen("content")}>
+          <Group label="Content" collapsible={false}>
             {meta.content.primary.map((f, i) => (
               <InspectorField key={i} field={f} data={block.data} onChange={onChange} options={options} />
             ))}
-            {meta.content.more && (
-              <MoreDisclosure label={meta.content.more.label} fields={meta.content.more.fields} data={block.data} onChange={onChange} options={options} />
-            )}
           </Group>
         )}
 
-        <Group label="Layout" open={openState.layout} onOpenChange={setOpen("layout")}>
-          {variants.length > 0 && (
-            <ChoiceGrid columns={variants.length >= 3 ? 3 : (variants.length as 1 | 2)}>
+        {/* Named subsections (Button, Image, Navigation, Display…) — always
+            visible, same heading treatment as Content/Layout/Data. Nothing
+            here is hidden behind a disclosure: this is a builder for
+            non-designers, not a power-user tool with progressive reveal. */}
+        {meta.content.groups?.map((g) => (
+          <Group key={g.label} label={g.label} collapsible={false}>
+            {g.fields.map((f, i) => (
+              <InspectorField key={i} field={f} data={block.data} onChange={onChange} options={options} />
+            ))}
+          </Group>
+        ))}
+
+        {variants.length > 0 && (
+          <Group label="Layout" collapsible={false}>
+            <ChoiceGrid columns={2}>
               {variants.map((v, i) => (
                 <ChoiceCard
                   key={v}
@@ -171,117 +187,53 @@ export function InspectorPanel({ mobile = false, onClose }: { mobile?: boolean; 
                 />
               ))}
             </ChoiceGrid>
-          )}
-          {/* spacing is a refinement, not a first-run decision — kept out of
-              the default view so Layout reads as "pick one of these" */}
-          <Disclosure label="Spacing" open={moreLayout} onToggle={() => setMoreLayout((o) => !o)}>
-            <Seg
-              value={block.dense}
-              onChange={(d) => dispatch({ type: "blockDense", index: sel, dense: d as never })}
-              options={[
-                { value: "comfortable", label: "Cosy" },
-                { value: "compact", label: "Compact" },
-                { value: "roomy", label: "Roomy" },
-              ]}
-            />
-            <p className="flex items-start gap-1.5 text-caption text-faint">
-              <Link2 className="mt-0.5 size-3.5 shrink-0" />
-              Colours, fonts and corners come from <b className="font-medium text-muted-foreground">Design</b>.
-            </p>
-          </Disclosure>
-        </Group>
+          </Group>
+        )}
 
-        <Group label="Visibility" open={openState.visibility} onOpenChange={setOpen("visibility")}>
-          <Row label="Show on">
-            <SegToggles
-              items={(["desktop", "tablet", "mobile"] as Device[]).map((bp) => ({
-                value: bp,
-                label: bp === "desktop" ? "Desktop" : bp === "tablet" ? "Tablet" : "Phone",
-                on: block.visibility[bp] !== false,
-                onToggle: () => dispatch({ type: "blockVisibility", index: sel, device: bp, visible: block.visibility[bp] === false }),
-              }))}
-            />
-          </Row>
-          <p className="text-caption text-muted-foreground">
-            Turn a screen off to hide this section there. Wording and layout stay the same on every screen.
-          </p>
-        </Group>
-
-        <Group label="Data" open={openState.data} onOpenChange={setOpen("data")}>
-          <DataBody type={block.type} />
-        </Group>
+        {/* No empty "Data" shell for sections that don't actually have any
+            ManagR-backed values — an empty card here would just be noise. */}
+        {!!meta.dataRows?.length && (
+          <Group label="Data" collapsible={false}>
+            <DataBody type={block.type} />
+          </Group>
+        )}
       </PanelScroll>
     </Panel>
   );
 }
 
-function MoreDisclosure({
-  label, fields, data, onChange, options,
-}: {
-  label: string;
-  fields: Field[];
-  data: Record<string, unknown>;
-  onChange: (k: string, v: unknown) => void;
-  options: OptionFn;
-}) {
-  const [open, setOpen] = React.useState(false);
-  return (
-    <Disclosure label={label} open={open} onToggle={() => setOpen((o) => !o)}>
-      {fields.map((f, i) => (
-        <InspectorField key={i} field={f} data={data} onChange={onChange} options={options} />
-      ))}
-    </Disclosure>
-  );
-}
-
-/** a quiet "more" toggle — a text control, not another boxed card */
-function Disclosure({
-  label, open, onToggle, children,
-}: {
-  label: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="-mx-1 flex w-[calc(100%+0.5rem)] items-center gap-1.5 rounded-md px-1 py-1 text-caption font-semibold text-muted-foreground transition-colors hover:bg-panel-hover hover:text-foreground"
-      >
-        <ChevronDown className={cn("size-3.5 shrink-0 text-faint transition-transform", open && "rotate-180")} />
-        {label}
-      </button>
-      {open && <div className="mt-3 space-y-3.5">{children}</div>}
-    </div>
-  );
-}
-
+/** This section is only ever rendered when `meta.dataRows.length > 0` (see
+ *  the caller) — no "this section has no ManagR data" filler card. */
 function DataBody({ type }: { type: string }) {
   const s = useS();
-  const dispatch = useDispatch();
   const meta = SECTIONS[type as keyof typeof SECTIONS];
-  if (!meta.dataRows?.length)
-    return (
-      <p className="text-caption text-muted-foreground">
-        This section has no ManagR data — everything in it is content you set here.
-      </p>
-    );
+  const rows = meta.dataRows!;
+
   return (
     <>
-      <p className="text-caption text-muted-foreground">
-        These come straight from ManagR and update on your live site on their own — never part of publishing.
-      </p>
-      {meta.dataRows.map((r) => <BoundField key={r.label} label={r.label} value={r.value} where={r.where} />)}
-      {type === "properties" && (
-        <Button variant="outline" size="sm" className="w-full" asChild>
-          <a href="/website/availability" onClick={() => dispatch({ type: "select", block: null })}>Set up live availability →</a>
-        </Button>
-      )}
-      {s.availOn && type === "properties" && (
-        <p className="text-caption text-muted-foreground">Availability shown: {s.availLevel}</p>
-      )}
+      <DataSource />
+      <div className="mt-3 space-y-3">
+        {rows.map((r) => {
+          const action = MANAGR_ACTION[r.where];
+          // Live availability is the one row whose *note* is runtime, not
+          // static copy — configured vs. not, so the card actually
+          // distinguishes "connected" from "needs setup" instead of always
+          // reading the same placeholder sentence.
+          const note = r.where === "Live availability"
+            ? (s.availOn ? `Showing ${s.availLevel}.` : "Not set up yet.")
+            : r.note;
+          return (
+            <DataCard
+              key={r.title}
+              title={r.title}
+              items={r.items}
+              note={note}
+              where={r.where === "—" ? undefined : r.where}
+              action={action}
+            />
+          );
+        })}
+      </div>
     </>
   );
 }

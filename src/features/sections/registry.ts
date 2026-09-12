@@ -36,10 +36,21 @@ export interface SectionMeta {
   needs?: "photos" | "reviews";
   subParts?: string[];
   layoutVariants: string[];
-  /** Content-tab primary fields + a `more` bucket for progressive disclosure */
-  content: { primary: Field[]; more?: { label: string; fields: Field[] } };
+  /** Content-tab fields. `primary` is the section's core copy; `groups` are
+   *  additional named, always-visible subsections (Button, Image, Navigation,
+   *  Display…) — never hidden behind a disclosure. A section with nothing
+   *  beyond its core copy just omits `groups`. */
+  content: { primary: Field[]; groups?: { label: string; fields: Field[] }[] };
   /** ManagR-data rows shown on the "ManagR data" tab (read-only) */
-  dataRows?: { label: string; value: string; where: string }[];
+  /** One entry per logical, ManagR-owned data category this section uses.
+   *  `title` names the category (the card's own heading — "Managed
+   *  automatically" is said once for the whole Data group, never per
+   *  card). `items` lists what's included (field names, not values).
+   *  `note` is an optional one-line status/explanation. `where` locates it
+   *  for action resolution (only sections with a real destination get a
+   *  button — see `MANAGR_ACTION` in InspectorPanel.tsx; no destination
+   *  means no footer at all, not a dead button). */
+  dataRows?: { title: string; items: string[]; note?: string; where: string }[];
 }
 
 const DEF_LAYOUT = ["Default"];
@@ -54,14 +65,16 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
         { kind: "text", key: "logotext", label: "Business name shown", placeholder: "Shree Residency" },
         { kind: "note", text: "No logo is fine — visitors see a clean “S” mark, never a broken image." },
       ],
-      more: {
-        label: "Menu links & buttons",
-        fields: [
-          { kind: "checklist", label: "Which links appear in the menu", items: ["Properties", "About", "Contact", "FAQ", "Gallery"], hint: "Only pages you've created can be linked. Order follows your page order." },
-          { kind: "toggle", key: "call", label: "Show a Call button in the menu" },
-          { kind: "toggle", key: "sticky", label: "Keep the menu visible as visitors scroll" },
-        ],
-      },
+      groups: [
+        {
+          label: "Navigation",
+          fields: [
+            { kind: "checklist", label: "Which links appear in the menu", items: ["Properties", "About", "Contact", "FAQ", "Gallery"], hint: "Only pages you've created can be linked. Order follows your page order." },
+            { kind: "toggle", key: "call", label: "Show a Call button in the menu" },
+            { kind: "toggle", key: "sticky", label: "Keep the menu visible as visitors scroll" },
+          ],
+        },
+      ],
     },
   },
   hero: {
@@ -73,17 +86,24 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
       primary: [
         { kind: "text", key: "headline", label: "Main heading", placeholder: "Shree Residency — PG & Hostel stays in Andheri West", hint: "Leave blank to use a sensible default." },
         { kind: "text", key: "sub", label: "One line under it", placeholder: "Direct from owner. No brokerage." },
-        { kind: "select", key: "btnAction", label: "Main button does", options: ["Start a phone call", "Open WhatsApp", "Scroll down to properties", "Nothing (hide the button)"] },
       ],
-      more: {
-        label: "Picture & button wording",
-        fields: [
-          { kind: "select", key: "bg", label: "Background picture", options: ["Use one of my property photos", "Plain colour, no picture"] },
-          { kind: "text", key: "btn", label: "Button wording", placeholder: "Call now" },
-        ],
-      },
+      groups: [
+        {
+          label: "Button",
+          fields: [
+            { kind: "select", key: "btnAction", label: "Button does", options: ["Start a phone call", "Open WhatsApp", "Scroll down to properties", "Nothing (hide the button)"] },
+            { kind: "text", key: "btn", label: "Button label", placeholder: "Call now" },
+          ],
+        },
+        {
+          label: "Image",
+          fields: [
+            { kind: "select", key: "bg", label: "Background picture", options: ["Use one of my property photos", "Plain colour, no picture"] },
+          ],
+        },
+      ],
     },
-    dataRows: [{ label: "Background photo", value: "Shree Residency — exterior", where: "Properties → Photos" }],
+    dataRows: [{ title: "Background photo", items: [], note: "Uses one of your property photos.", where: "Properties → Photos" }],
   },
   properties: {
     id: "properties", name: "Properties", category: "Properties", icon: Grid3x3, solo: true,
@@ -95,16 +115,18 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
         { kind: "frommgr", where: "Properties" },
         { kind: "select", key: "order", label: "Order them by", options: ["Newest first", "Ones I've featured first", "Most beds available first"] },
       ],
-      more: {
-        label: "Card style & count",
-        fields: [
-          { kind: "select", key: "cardStyle", label: "Card style", options: ["With photo", "Compact"] },
-        ],
-      },
+      groups: [
+        {
+          label: "Display",
+          fields: [
+            { kind: "select", key: "cardStyle", label: "Card style", options: ["With photo", "Compact"] },
+          ],
+        },
+      ],
     },
     dataRows: [
-      { label: "Property name, area, rent, rooms", value: "Approved properties", where: "Properties" },
-      { label: "Availability shown on cards", value: "Set in Live availability", where: "Live availability" },
+      { title: "Property information", items: ["Property name", "Area", "Rent", "Rooms"], where: "Properties" },
+      { title: "Live availability", items: ["Availability", "Room type"], note: "Not set up yet.", where: "Live availability" },
     ],
   },
   featured: {
@@ -137,7 +159,7 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
     id: "reviews", name: "Reviews", category: "Trust", icon: Star, needs: "reviews", layoutVariants: DEF_LAYOUT,
     blurb: "Real tenant reviews, pulled from ManagR.",
     content: { primary: [{ kind: "frommgr", where: "Tenants → Reviews" }] },
-    dataRows: [{ label: "Reviews", value: "Tenant reviews", where: "Tenants → Reviews" }],
+    dataRows: [{ title: "Reviews", items: [], note: "Real tenant reviews from ManagR.", where: "Tenants → Reviews" }],
   },
   about: {
     id: "about", name: "About", category: "Content", icon: Type, subParts: ["Text", "Photo"],
@@ -146,10 +168,17 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
     content: {
       primary: [
         { kind: "textarea", key: "text", label: "Your story, in a few lines", placeholder: "Family-run, home-cooked meals, five minutes from the station…" },
-        { kind: "select", key: "photo", label: "Photo beside it", options: ["One of my property photos", "Upload a photo"] },
+      ],
+      groups: [
+        {
+          label: "Image",
+          fields: [
+            { kind: "select", key: "photo", label: "Photo beside it", options: ["One of my property photos", "Upload a photo"] },
+          ],
+        },
       ],
     },
-    dataRows: [{ label: "Photo", value: "A property photo", where: "Properties → Photos" }],
+    dataRows: [{ title: "Photo", items: [], note: "Uses one of your property photos.", where: "Properties → Photos" }],
   },
   richtext: {
     id: "richtext", name: "Text", category: "Content", icon: Type, dup: true, layoutVariants: DEF_LAYOUT,
@@ -167,14 +196,16 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
         { kind: "action", label: "Choose photos", go: "assets" },
       ],
     },
-    dataRows: [{ label: "Photos", value: "Property photos", where: "Properties → Photos" }],
+    dataRows: [{ title: "Property photos", items: [], note: "Uses photos from your properties.", where: "Properties → Photos" }],
   },
   faq: {
     id: "faq", name: "FAQ", category: "Content", icon: HelpCircle, dup: true, layoutVariants: DEF_LAYOUT,
     blurb: "Answer the questions people always ask, and cut repeat calls.",
     content: {
-      primary: [{ kind: "note", text: "Add the questions people ask most. Keep answers short." }],
-      more: { label: "Common questions to add in one tap", fields: [{ kind: "note", text: "Is there a curfew? · Is a deposit required? · Can I visit first? · Are guests allowed?" }] },
+      primary: [
+        { kind: "note", text: "Add the questions people ask most. Keep answers short." },
+        { kind: "note", text: "Common ones: Is there a curfew? · Is a deposit required? · Can I visit first? · Are guests allowed?" },
+      ],
     },
   },
   enquiry: {
@@ -186,7 +217,7 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
         { kind: "toggle", key: "fab", label: 'Floating "Enquire" button on mobile', sub: "Follows the visitor as they scroll" },
       ],
     },
-    dataRows: [{ label: "Where leads go", value: 'Leads & CRM · tagged "Website"', where: "Leads & CRM" }],
+    dataRows: [{ title: "Leads", items: [], note: 'Submissions are tagged "Website" in your CRM.', where: "Leads & CRM" }],
   },
   visit: {
     id: "visit", name: "Visits", category: "Convert", icon: CalendarDays, advanced: true, solo: true, layoutVariants: DEF_LAYOUT,
@@ -197,7 +228,7 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
         { kind: "action", label: "Set the days, times & rules", go: "visits", icon: "calendar" },
       ],
     },
-    dataRows: [{ label: "Days, slots, rules", value: "From your visit settings", where: "Visit settings" }],
+    dataRows: [{ title: "Visit settings", items: ["Days", "Time slots", "Booking rules"], where: "Visit settings" }],
   },
   bookcta: {
     id: "bookcta", name: "Booking request", category: "Convert", icon: CheckCircle2, advanced: true, layoutVariants: DEF_LAYOUT,
@@ -208,8 +239,10 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
     id: "offer", name: "Offer", category: "Convert", icon: Tag, dup: true, layoutVariants: DEF_LAYOUT,
     blurb: '"₹1,000 off this month" — shows and hides itself on dates you set.',
     content: {
-      primary: [{ kind: "text", key: "text", label: "Offer text", placeholder: "₹1,000 off this month" }],
-      more: { label: "Colour", fields: [{ kind: "note", text: "Pick from your brand palette." }] },
+      primary: [
+        { kind: "text", key: "text", label: "Offer text", placeholder: "₹1,000 off this month" },
+        { kind: "note", text: "Uses your site's brand colour — set that once in Design." },
+      ],
     },
   },
   contact: {
@@ -222,8 +255,8 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
       ],
     },
     dataRows: [
-      { label: "Phone / WhatsApp / email", value: "From Website settings", where: "Website settings → Contact" },
-      { label: "Map location", value: "Approximate only — exact address never shown", where: "—" },
+      { title: "Contact information", items: ["Phone", "WhatsApp", "Email"], where: "Website settings → Contact" },
+      { title: "Map location", items: [], note: "Approximate location only. Exact address is never shown publicly.", where: "—" },
     ],
   },
   wacta: {
@@ -241,7 +274,7 @@ export const SECTIONS: Record<SectionType, SectionMeta> = {
         { kind: "toggle", key: "powered", label: 'Show "Powered by ManagR"' },
       ],
     },
-    dataRows: [{ label: "Contact details", value: "From Website settings", where: "Website settings → Contact" }],
+    dataRows: [{ title: "Contact information", items: ["Phone", "Email", "Area"], where: "Website settings → Contact" }],
   },
 };
 
@@ -269,7 +302,7 @@ export function editorKeys(id: SectionType): string[] {
     for (const f of fields) if ("key" in f && f.key) keys.push(f.key);
   };
   walk(m.content.primary);
-  walk(m.content.more?.fields);
+  m.content.groups?.forEach((g) => walk(g.fields));
   return keys;
 }
 

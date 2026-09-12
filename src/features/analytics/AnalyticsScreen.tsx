@@ -19,7 +19,7 @@ export function AnalyticsScreen() {
   ];
 
   return (
-    <Page>
+    <Page size="wide">
       <PageHead title="What your website is doing" description="Plain numbers — no charts to read." />
 
       <PageBody>

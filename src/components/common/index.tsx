@@ -127,7 +127,7 @@ const noticeTone = {
   info: "border-l-info bg-info-surface",
   warn: "border-l-warning bg-warning-surface",
   ok: "border-l-success bg-success-surface",
-  stop: "border-l-destructive bg-destructive/[0.05]",
+  stop: "border-l-destructive bg-destructive-surface",
   advanced: "border-l-advanced bg-advanced-surface",
   plain: "border-l-border-strong bg-surface-2",
 };
@@ -203,16 +203,68 @@ export function FromManagR({ where }: { where?: string }) {
     </span>
   );
 }
-export function BoundField({ label, value, where }: { label: string; value: string; where: string }) {
+/** Says once, for the whole DATA group, that this section runs on data the
+ *  owner doesn't type in here — never repeated inside the cards below,
+ *  which get straight to naming their own category. */
+export function DataSource() {
   return (
-    <div className="rounded-lg border border-border-subtle bg-surface-2 px-3.5 py-3">
-      <div className="text-caption text-muted-foreground">{label}</div>
-      <div className="mt-0.5 font-semibold text-foreground">{value}</div>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <FromManagR />
-        <button className="text-caption font-semibold text-brand hover:underline">Edit in ManagR →</button>
+    <div className="flex items-start gap-2">
+      <Link2 className="mt-0.5 size-3.5 shrink-0 text-info" />
+      <div className="min-w-0 leading-snug">
+        <div className="text-caption font-semibold text-foreground">Managed automatically from ManagR</div>
+        <div className="text-caption text-muted-foreground">These details stay in sync with your account.</div>
       </div>
-      {where !== "—" && <div className="mt-1 text-caption text-faint">Managed in {where}</div>}
+    </div>
+  );
+}
+
+/** One logical data category as an actual card — visually distinct from
+ *  the inspector around it (a real border + a whisper of elevation, not
+ *  just a tinted rectangle), not a database record:
+ *
+ *   HEADER   the category itself ("PROPERTY INFORMATION") — this is the
+ *            card's identity; "Managed automatically" is never repeated
+ *            here, the DATA group already said it once.
+ *   BODY     what's included, as a real list — plus an optional one-line
+ *            status/explanation (the one place per-card nuance belongs).
+ *   FOOTER   only rendered when a real destination exists: a divider, a
+ *            quiet "Managed in X", and a proper solid orange button below
+ *            it — never a text link, never beside the source line. No
+ *            destination means no footer at all, not a dead button. */
+export function DataCard({
+  title, items, note, where, action,
+}: {
+  title: string;
+  items: string[];
+  note?: string;
+  where?: string;
+  action?: { label: string; href: string };
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-surface p-4 shadow-xs">
+      <div className="text-caption font-bold uppercase tracking-wide text-foreground">{title}</div>
+
+      {items.length > 0 && (
+        <ul className="mt-2.5 space-y-1.5">
+          {items.map((it) => (
+            <li key={it} className="text-body leading-snug text-foreground">{it}</li>
+          ))}
+        </ul>
+      )}
+
+      {note && <p className={cn("text-caption leading-relaxed text-muted-foreground", items.length > 0 ? "mt-2.5" : "mt-2")}>{note}</p>}
+
+      {action && (
+        <>
+          <div className="-mx-4 mt-4 border-t border-border-subtle" />
+          <div className="mt-3">
+            {where && <p className="mb-2.5 text-caption text-faint">Managed in {where}</p>}
+            <Button asChild variant="primary" size="sm" className="w-full">
+              <a href={action.href}>{action.label}</a>
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -274,9 +326,10 @@ export function ChoiceRow({
     <Comp
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg border px-3.5 py-3 text-left text-body transition-colors",
+        "flex w-full items-center gap-3 rounded-lg border bg-surface px-3.5 py-3 text-left text-body transition-colors",
         onClick || as === "label" ? "cursor-pointer" : "",
-        selected ? "border-brand bg-brand/[0.05] ring-1 ring-inset ring-brand/20" : "border-border bg-surface hover:bg-surface-2",
+        // One selection language across the product: a border, nothing else.
+        selected ? "border-brand" : "border-border hover:bg-surface-2",
         className,
       )}
     >
@@ -297,7 +350,7 @@ const statusMap = {
   live: { dot: "bg-success", text: "text-success", pill: "border-success-border bg-success-surface text-success" },
   ok: { dot: "bg-success", text: "text-success", pill: "border-success-border bg-success-surface text-success" },
   attention: { dot: "bg-warning", text: "text-warning", pill: "border-warning-border bg-warning-surface text-warning" },
-  action: { dot: "bg-destructive", text: "text-destructive", pill: "border-destructive/25 bg-destructive/[0.06] text-destructive" },
+  action: { dot: "bg-destructive", text: "text-destructive", pill: "border-destructive-border bg-destructive-surface text-destructive" },
   off: { dot: "bg-faint", text: "text-muted-foreground", pill: "border-border bg-sunken text-muted-foreground" },
   pending: { dot: "bg-warning", text: "text-warning", pill: "border-warning-border bg-warning-surface text-warning" },
   advanced: { dot: "bg-advanced", text: "text-advanced", pill: "border-advanced-border bg-advanced-surface text-advanced" },
@@ -435,11 +488,29 @@ export function Placeholder({ children, className }: { children?: React.ReactNod
 
 /* ---------- the one Website-Management content frame ----------
    Every management page — header AND body — sits in this, so the five pages
-   share one outer geometry: same left/right edge, same gutters, same header
-   anchor. Width *inside* the frame is a per-section decision (a form reads
-   narrow, a table uses the room) — never a per-page one. */
-export function Page({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mx-auto w-full max-w-[840px]", className)}>{children}</div>;
+   share one outer geometry: same left edge, same gutters, same header
+   anchor (no `mx-auto` — the frame is anchored to the shared shell's own
+   padding, not re-centred, so a narrow "content" page and a wide "full"
+   page still start at the identical x-position). What varies is the
+   frame's own outer width via `size`, because a real table can never use
+   more room than its ancestor allows no matter how it's styled internally
+   — width has to be a per-page decision at the one place that actually
+   bounds it. Sections inside a frame still narrow themselves further when
+   the content wants it (a metric row, a callout) — that per-section
+   judgment from the original design is unchanged, just no longer asked to
+   do a per-page job it structurally couldn't. */
+export function Page({
+  children, size = "content", className,
+}: {
+  children: React.ReactNode;
+  /** content: forms/prose that read best at a comfortable width (Availability, Booking requests).
+   *  wide: pages with a real internal grid that wants more room (Settings' two-column fields, Visits' schedule grid).
+   *  full: pages with a genuine table that should use the workspace's available width (Enquiries). */
+  size?: "content" | "wide" | "full";
+  className?: string;
+}) {
+  const width = { content: "max-w-[840px]", wide: "max-w-[1040px]", full: "max-w-none" }[size];
+  return <div className={cn("w-full", width, className)}>{children}</div>;
 }
 
 /* ---------- page wrapper: consistent vertical rhythm under PageHead ---------- */
@@ -472,11 +543,11 @@ export function SettingsCard({
   return (
     <Card className={cn("overflow-hidden", className)}>
       <div className="flex items-start gap-3 border-b border-border-subtle p-4 sm:px-5 sm:py-4">
-        {icon && <IconTile icon={icon} tint={tint} size="md" className="mt-px" />}
+        {icon && <IconTile icon={icon} tint={tint} size="md" className="mt-0.5" />}
         <div className="min-w-0 flex-1">
           <h3 className="text-section font-bold leading-snug text-foreground">{title}</h3>
           {description && (
-            <p className="mt-1 max-w-[68ch] text-caption leading-relaxed text-muted-foreground">{description}</p>
+            <p className="mt-0.5 max-w-[68ch] text-caption leading-snug text-muted-foreground">{description}</p>
           )}
         </div>
         {action && <div className="shrink-0 pl-1">{action}</div>}

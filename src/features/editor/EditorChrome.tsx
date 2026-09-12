@@ -1,14 +1,16 @@
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Layers, Plus, Image as ImageIcon, Sparkles, Tablet, Search, ChevronLeft, Undo2, Redo2,
-  Monitor, Smartphone, Eye, Pencil, ChevronDown, Check, AlertTriangle, Info, History, RotateCcw,
-  MoreHorizontal, ArrowUp, ArrowDown, Cloud, CloudOff, SlidersHorizontal,
+  Layers, Plus, Sparkles, Tablet, ChevronLeft, Undo2, Redo2,
+  Monitor, Smartphone, Eye, Pencil, ChevronDown, Check, History, RotateCcw,
+  MoreHorizontal, ArrowUp, ArrowDown, Cloud, CloudOff, SlidersHorizontal, Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/ui/tooltip";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { useBuilder } from "@/store/BuilderProvider";
 import { useS, useDispatch, useDerived } from "@/store/hooks";
 import { useEditorUI } from "./EditorContext";
@@ -17,64 +19,52 @@ import { SECTIONS } from "@/features/sections/registry";
 import { OWNER } from "@/data/managr";
 import { structureLocked } from "@/store/selectors";
 
-type LeftMode = "layers" | "pages" | "add" | "assets";
-// "Pages" is deliberately not a rail destination: the site is a single page
-// today, plus one auto-generated property-detail page and (Advanced) a
-// handful of extra pages — switching between them belongs with "where am I"
-// in the toolbar's page picker, not competing with page STRUCTURE here.
-//
-// The rail is two tiers, not one flat list: Sections/Add/Design are the
-// primary editing modes (full size); Photos/Check are secondary utilities
-// (smaller, quieter) — they support the edit, they aren't a peer of it.
-const PRIMARY_RAIL: [LeftMode, string, typeof Layers][] = [
-  ["layers", "Sections", Layers],
-  ["add", "Add", Plus],
-];
-
-/* ---------- left rail ("tools") ---------- */
-export function EditorRail() {
-  const s = useS();
-  const dispatch = useDispatch();
-  const ui = useEditorUI();
-  const btn =
-    "flex flex-col items-center gap-1 rounded-lg px-1 py-2 text-[10px] font-semibold min-h-[50px] transition-colors [&_svg]:size-[18px]";
-  const idle = "text-muted-foreground hover:bg-accent hover:text-foreground";
-  const active = "bg-brand/[0.09] font-bold text-brand";
-  const minor =
-    "flex flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[9.5px] font-medium min-h-[40px] text-faint transition-colors hover:bg-accent hover:text-muted-foreground [&_svg]:size-4";
-  return (
-    <div className="flex h-full flex-col gap-1 border-r border-border bg-surface-2 px-1.5 py-3">
-      {PRIMARY_RAIL.map(([mode, label, Icon]) => (
-        <button key={mode} onClick={() => dispatch({ type: "leftMode", mode })} className={cn(btn, s.leftMode === mode ? active : idle)}>
-          <Icon /> {label}
-        </button>
-      ))}
-      <button className={cn(btn, idle)} onClick={() => ui.open("design")}><Sparkles /> Design</button>
-
-      <div className="mx-3 my-1.5 h-px bg-border-subtle" />
-
-      <button
-        className={cn(minor, s.leftMode === "assets" && "text-muted-foreground")}
-        onClick={() => dispatch({ type: "leftMode", mode: "assets" })}
-      >
-        <ImageIcon /> Photos
-      </button>
-      <button className={minor} onClick={() => ui.open("responsive")}><Tablet /> Check</button>
-
-      <div className="flex-1" />
-      <button className={minor} onClick={() => ui.open("command")}><Search /> Find</button>
-    </div>
-  );
-}
-
-/* ---------- save indicator (quiet) ---------- */
+/* ---------- save indicator — a compact status pill, not a badge ---------- */
 function SaveDot() {
   const s = useS();
+  const pill = "inline-flex h-6 shrink-0 items-center gap-1 rounded-full px-2 text-caption font-medium";
   if (s.saveState === "saving")
-    return <span className="flex items-center gap-1.5 text-caption text-muted-foreground"><Cloud className="size-3.5 animate-pulse" /> Saving…</span>;
+    return <span className={cn(pill, "bg-sunken text-muted-foreground")}><Cloud className="size-3.5 animate-pulse" /> Saving…</span>;
   if (s.saveState === "offline")
-    return <span className="flex items-center gap-1.5 text-caption text-warning"><CloudOff className="size-3.5" /> Offline — saved on this device</span>;
-  return <span className="flex items-center gap-1.5 text-caption text-muted-foreground"><Check className="size-3.5 text-success" /> Saved</span>;
+    return <span className={cn(pill, "bg-warning-surface text-warning")}><CloudOff className="size-3.5" /> Offline</span>;
+  return <span className={cn(pill, "bg-success-surface text-success")}><Check className="size-3.5" /> Saved</span>;
+}
+
+/* ---------- current website context — reuses the real property data,
+   does not invent a multi-website switcher (see EditorChrome notes) ---------- */
+function PropertySelector() {
+  const { publicProperties } = useDerived();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="inline-flex h-8 min-w-0 max-w-[220px] items-center gap-1.5 rounded-lg px-2 text-caption font-semibold text-foreground transition-colors hover:bg-surface-2">
+          <Building2 className="size-3.5 shrink-0 text-faint" />
+          <span className="truncate">{OWNER.biz}</span>
+          <ChevronDown className="size-3.5 shrink-0 text-faint" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" collisionPadding={8} className="w-64">
+        <DropdownMenuLabel>Your website</DropdownMenuLabel>
+        <div className="flex items-center gap-2 px-2 py-1.5 text-body">
+          <Check className="size-4 shrink-0 text-success" />
+          <span className="min-w-0 flex-1 truncate font-semibold text-foreground">{OWNER.biz}</span>
+        </div>
+        {publicProperties.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Properties on this site</DropdownMenuLabel>
+            {publicProperties.map((p) => (
+              <div key={p.id} className="flex items-center gap-2 px-2 py-1.5 text-caption text-muted-foreground">
+                <Building2 className="size-3.5 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                <span className="shrink-0 text-faint">{p.area}</span>
+              </div>
+            ))}
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 /* ---------- desktop toolbar ---------- */
@@ -83,26 +73,20 @@ export function EditorToolbar() {
   const dispatch = useDispatch();
   const nav = useNavigate();
   const { undo, redo, canUndo, canRedo } = useBuilder();
-  const { page } = useDerived();
   const ui = useEditorUI();
 
   return (
-    <div className="relative hidden h-[60px] shrink-0 items-center gap-2.5 border-b border-border bg-surface pl-2.5 pr-3.5 shadow-xs lg:flex">
-      {/* left cluster: where am I */}
-      <Button asChild variant="ghost" size="sm" className="-mr-0.5 text-muted-foreground">
-        <Link to="/website"><ChevronLeft /> Website</Link>
+    <div className="relative hidden h-[60px] shrink-0 items-center gap-2 border-b border-border bg-surface pl-2.5 pr-3.5 shadow-xs lg:flex">
+      {/* left cluster: leave the editor, current context, save state.
+          No page picker here — this V1 editor has one page, so a page
+          dropdown would only imply a choice that doesn't exist. */}
+      <Button asChild variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">
+        <Link to="/website" aria-label="Back to Website"><ChevronLeft className="size-4" /> Website</Link>
       </Button>
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm font-semibold text-foreground">{OWNER.biz}</span>
-        <span className="text-faint">/</span>
-        <button
-          onClick={() => ui.open("pagePick")}
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-transparent px-2.5 text-caption font-semibold text-foreground transition-colors hover:border-border hover:bg-surface-2"
-        >
-          {page.name} <ChevronDown className="size-3.5 text-faint" />
-        </button>
-      </div>
-      <span className="mx-0.5 h-5 w-px bg-border" />
+
+      <span className="h-5 w-px bg-border" />
+
+      <PropertySelector />
       <SaveDot />
 
       <span className="flex-1" />
@@ -119,8 +103,11 @@ export function EditorToolbar() {
         <DeviceSwitcher />
       </div>
 
-      {/* right cluster: leave / ship */}
-      <Button variant="ghost" size="sm" onClick={() => dispatch({ type: "editMode", on: !s.editMode })}>
+      {/* right cluster: global actions only — design, preview, publish */}
+      <Button variant="outline" size="sm" onClick={() => ui.open("design")}>
+        <Sparkles /> Design
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => dispatch({ type: "editMode", on: !s.editMode })}>
         {s.editMode ? <><Eye /> Preview</> : <><Pencil /> Edit</>}
       </Button>
 
@@ -134,7 +121,7 @@ export function EditorToolbar() {
               <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" collisionPadding={8}>
             <DropdownMenuItem onClick={() => ui.open("publish")}><Check /> Review &amp; publish</DropdownMenuItem>
             <DropdownMenuItem onClick={() => ui.open("responsive")}><Tablet /> Check phone layout</DropdownMenuItem>
             <DropdownMenuItem onClick={() => nav("/website/preview")}><Eye /> Preview as a visitor</DropdownMenuItem>
@@ -166,54 +153,27 @@ function DeviceSwitcher() {
   );
 }
 
-/* ---------- desktop status bar ---------- */
-export function EditorStatusBar() {
-  const s = useS();
-  const nav = useNavigate();
-  const { page, check, respIssues } = useDerived();
-  const ui = useEditorUI();
-  const health = check.blockers.length
-    ? { dot: "bg-warning", text: `${check.blockers.length} to fix before publishing` }
-    : check.warnings.length
-      ? { dot: "bg-info", text: `${check.warnings.length} to review` }
-      : { dot: "bg-success", text: "Ready to publish" };
-
-  return (
-    <div className="flex h-9 shrink-0 items-center gap-4 border-t border-border bg-surface px-4 text-caption text-muted-foreground">
-      <span>{page.name} · {page.blocks.filter((b) => !b.hidden).length} sections showing</span>
-      <button className="inline-flex items-center gap-1.5 hover:text-foreground" onClick={() => nav("/website/health")}>
-        <span className={cn("size-1.5 rounded-full", health.dot)} /> {health.text}
-      </button>
-      <button className="inline-flex items-center gap-1.5 hover:text-foreground" onClick={() => ui.open("responsive")}>
-        <Smartphone className="size-3.5" />{" "}
-        {respIssues.length ? `${respIssues.length} phone-layout note${respIssues.length > 1 ? "s" : ""}` : "Phone layout looks good"}
-      </button>
-      <span className="flex-1" />
-      <button
-        className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 transition-colors hover:bg-accent hover:text-foreground"
-        onClick={() => ui.open("command")}
-      >
-        <Search className="size-3.5" /> Quick actions <kbd className="text-[10px] text-faint">⌘K</kbd>
-      </button>
-    </div>
-  );
-}
-
 /* ---------- mobile top bar ---------- */
 export function EditorMobileTop() {
+  const s = useS();
   const { page } = useDerived();
   const ui = useEditorUI();
+  const hasMultiplePages = s.pages.filter((p) => p.kind === "standard").length > 1;
   return (
     <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-surface px-2 lg:hidden">
       <Button asChild variant="ghost" size="icon-sm" aria-label="Back to Website">
         <Link to="/website"><ChevronLeft /></Link>
       </Button>
-      <button
-        onClick={() => ui.open("pagePick")}
-        className="flex h-9 flex-1 items-center gap-1.5 rounded-lg bg-surface-2 px-3 text-caption font-semibold"
-      >
-        {page.name} <ChevronDown className="size-3.5 text-faint" />
-      </button>
+      {hasMultiplePages ? (
+        <button
+          onClick={() => ui.open("pagePick")}
+          className="flex h-9 flex-1 items-center gap-1.5 rounded-lg bg-surface-2 px-3 text-caption font-semibold"
+        >
+          {page.name} <ChevronDown className="size-3.5 text-faint" />
+        </button>
+      ) : (
+        <span className="flex-1 px-3 text-caption font-semibold text-muted-foreground">{page.name}</span>
+      )}
       <div className="pr-1"><SaveDot /></div>
       <Button variant="ghost" size="icon-sm" aria-label="More" onClick={() => ui.open("editorMore")}><MoreHorizontal /></Button>
     </div>

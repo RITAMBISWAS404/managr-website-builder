@@ -18,7 +18,7 @@ export function PlanBanner() {
   const tone = {
     info: "border-info-border bg-info-surface",
     warn: "border-warning-border bg-warning-surface",
-    stop: "border-destructive/30 bg-destructive/10",
+    stop: "border-destructive-border bg-destructive-surface",
   }[cfg.tone];
 
   return (

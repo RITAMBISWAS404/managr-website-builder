@@ -1,18 +1,29 @@
 import * as React from "react";
 import { useSearchParams } from "react-router-dom";
-import { Lock, Eye } from "lucide-react";
+import { Lock, Eye, Monitor, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useBuilder } from "@/store/BuilderProvider";
 import { useS, useDispatch, useDerived } from "@/store/hooks";
 import { canEdit } from "@/store/selectors";
+import { OWNER } from "@/data/managr";
 import { EditorUIProvider, useEditorUI } from "./EditorContext";
-import { EditorRail, EditorToolbar, EditorStatusBar, EditorMobileTop, EditorMobileBar, EditorMobileFloat } from "./EditorChrome";
+import { EditorToolbar } from "./EditorChrome";
 import { LeftPanel } from "./LeftPanel";
 import { WebsiteCanvas } from "./WebsiteCanvas";
 import { InspectorPanel } from "@/features/inspector/InspectorPanel";
 import { EditorOverlays } from "./overlays/EditorOverlays";
 import { CoachMarks } from "./CoachMarks";
+
+/* Editing needs the left structure panel, the canvas, and the right
+   inspector on screen at once — the same three-column layout the rest of
+   this editor is built around. Below that, there isn't a cramped-but-usable
+   middle ground worth building for V1: tablet/phone owners get a clean
+   preview instead of a half-working editor. Matches the `lg` breakpoint
+   already used everywhere else in this editor to draw that same line
+   (EditorChrome, LeftPanel, WebsiteCanvas) — one named threshold, not a
+   second one invented for this. */
+export const EDITOR_MIN_WIDTH = 1024;
 
 export function EditorScreen() {
   return (
@@ -68,25 +79,60 @@ function EditorInner() {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-workspace">
-      <EditorToolbar />
-      <EditorMobileTop />
-
-      <div className="grid min-h-0 flex-1 lg:grid-cols-[52px_284px_1fr_324px] xl:grid-cols-[56px_300px_1fr_340px]">
-        {/* 1 · navigation / sections — "tools" */}
-        <div className="hidden lg:block"><EditorRail /></div>
-        <div className="hidden min-w-0 overflow-hidden border-r border-panel-border bg-panel lg:block"><LeftPanel /></div>
-        {/* 2 · the workspace holding the website */}
-        <div className="min-w-0 overflow-auto bg-workspace"><WebsiteCanvas /></div>
-        {/* 3 · contextual inspector */}
-        <div className="hidden min-w-0 overflow-hidden border-l border-panel-border bg-panel lg:block"><InspectorPanel /></div>
+      {/* Desktop: the real editor — toolbar + three-column grid. Both this
+          and the notice below are always mounted; only CSS (the same `lg`
+          breakpoint) decides which one shows, so resizing the window never
+          remounts anything and never touches the store — draft edits,
+          selection, undo history and the current page all survive a resize
+          in either direction for free. */}
+      <div className="hidden min-h-0 flex-1 flex-col lg:flex">
+        <EditorToolbar />
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[284px_1fr_324px] xl:grid-cols-[300px_1fr_340px]">
+          <div className="min-w-0 overflow-hidden border-r border-panel-border bg-panel"><LeftPanel /></div>
+          <div className="min-w-0 overflow-auto bg-workspace"><WebsiteCanvas /></div>
+          <div className="min-w-0 overflow-hidden border-l border-panel-border bg-panel"><InspectorPanel /></div>
+        </div>
       </div>
 
-      <EditorMobileFloat />
-      <EditorMobileBar />
-      <div className="hidden lg:block"><EditorStatusBar /></div>
+      {/* Tablet/phone: editing genuinely isn't available yet — a real
+          environment limit, not a device the "Desktop/Tablet/Mobile"
+          preview switcher can be set to. That switcher controls what the
+          *website* is previewed at from a desktop editor; it's unrelated
+          to whether the *editor itself* can run here. */}
+      <div className="flex min-h-0 flex-1 lg:hidden">
+        <EditorDesktopOnlyNotice />
+      </div>
 
       <EditorOverlays />
       <CoachMarks />
+    </div>
+  );
+}
+
+function EditorDesktopOnlyNotice() {
+  return (
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-workspace">
+      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-surface px-2">
+        <Button asChild variant="ghost" size="icon-sm" aria-label="Back to Website">
+          <Link to="/website"><ChevronLeft /></Link>
+        </Button>
+        <span className="truncate text-sm font-semibold text-foreground">{OWNER.biz}</span>
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-sunken text-muted-foreground">
+          <Monitor className="size-5" />
+        </span>
+        <div className="max-w-[280px] space-y-1.5">
+          <p className="text-body font-bold text-foreground">Editing is available on desktop</p>
+          <p className="text-caption leading-relaxed text-muted-foreground">
+            Use a desktop computer to edit your website. You can still preview it here.
+          </p>
+        </div>
+        <Button asChild variant="primary">
+          <Link to="/website/preview"><Eye /> Preview website</Link>
+        </Button>
+      </div>
     </div>
   );
 }
