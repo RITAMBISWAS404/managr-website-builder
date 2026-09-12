@@ -37,7 +37,7 @@ function usePlanBadge(dark: boolean) {
   const s = useS();
   const { advActive } = useDerived();
   if (s.plan === "lapsed")
-    return <Badge variant="warning" className={dark ? "border-none bg-warning/20 text-warning-foreground/90" : ""}>Lapsed</Badge>;
+    return <Badge variant="warning" className={dark ? "border-none bg-white/15 text-warning" : ""}>Lapsed</Badge>;
   if (advActive)
     return <Badge variant="advanced" className={dark ? "border-none bg-white/15 text-white/90" : ""}>Advanced</Badge>;
   return <Badge variant="neutral" className={dark ? "border-none bg-white/10 text-white/70" : ""}>Free</Badge>;

@@ -37,7 +37,7 @@ export function HealthScreen() {
       : { status: "ok", label: "Ready to publish" };
 
   return (
-    <Page>
+    <Page size="full">
       <PageHead
         title="Website health"
         description="The same check runs automatically before every publish."

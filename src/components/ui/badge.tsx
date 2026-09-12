@@ -13,7 +13,7 @@ const badgeVariants = cva(
         warning: "bg-warning-surface text-warning",
         info: "bg-info-surface text-info",
         advanced: "bg-advanced-surface text-advanced",
-        destructive: "bg-destructive/10 text-destructive",
+        destructive: "bg-destructive-surface text-destructive",
       },
     },
     defaultVariants: { variant: "default" },

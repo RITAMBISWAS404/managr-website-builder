@@ -3,6 +3,16 @@
   "detector": {
     "ignoreRules": [],
     "ignoreFiles": [],
-    "ignoreValues": []
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/components/ui/tabs.tsx"
+        ],
+        "createdAt": "2026-09-12T10:04:46.183Z",
+        "reason": "rounded-t-sm rounds only the top corners; border-b-2 is the active-tab underline on the bottom edge — opposite edges, no visual clash. Standard underline-tab pattern (GitHub/Linear-style), not a border/radius conflict."
+      }
+    ]
   }
 }

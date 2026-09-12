@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ExternalLink, Pencil, Copy, QrCode, MessageCircle, Layers, Settings2, Eye, Globe, ChevronRight,
   CalendarClock, Inbox, ClipboardCheck, Sparkles, ArrowRight, AlertCircle, UploadCloud, Building2,
-  PhoneCall, History,
+  PhoneCall, History, CreditCard, ShieldCheck, AlertTriangle, Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -32,6 +32,13 @@ export function WebsiteHome() {
       : check.warnings.length
         ? { status: "attention", label: `${check.warnings.length} to review`, detail: check.warnings[0].msg }
         : { status: "ok", label: "Looks good", detail: "Nothing needs your attention" };
+
+  const healthVisual: { icon: React.ReactNode; tint: Tint } =
+    health.status === "action"
+      ? { icon: <AlertTriangle />, tint: "coral" }
+      : health.status === "attention"
+        ? { icon: <Info />, tint: "amber" }
+        : { icon: <ShieldCheck />, tint: "green" };
 
   const lastPub = s.versions.find((v) => v.isLive)?.ts;
 
@@ -95,7 +102,7 @@ export function WebsiteHome() {
 
       {/* ================= one thing to do next ================= */}
       {next && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-ring-soft bg-surface p-4 shadow-e1 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex flex-col gap-3 rounded-2xl border border-ring-soft bg-surface p-5 shadow-e1 sm:flex-row sm:items-center sm:gap-4 sm:p-6">
           <IconTile icon={next.icon} tint={next.tint} size="lg" className="shadow-xs" />
           <div className="min-w-0 flex-1">
             <div className="text-micro font-bold uppercase tracking-[0.07em] text-brand">Next</div>
@@ -111,81 +118,96 @@ export function WebsiteHome() {
       {/* ================= your website ================= */}
       <section>
         <SectionHeader>Your website</SectionHeader>
-        <Card className="overflow-hidden">
-          {/* region 1 — the website itself + its live state */}
-          <div className="p-6">
-            <div className="flex items-center gap-4">
-              <IconTile icon={<Globe />} tint="blue" size="lg" />
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-section font-bold leading-tight text-foreground">{OWNER.biz}</div>
-                <a
-                  href={`https://${url}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-0.5 inline-block max-w-full truncate font-mono text-caption text-muted-foreground transition-colors hover:text-brand hover:underline"
-                >
-                  {url}
-                </a>
-              </div>
-              <div className="flex shrink-0 items-center divide-x divide-border overflow-hidden rounded-lg border border-border bg-surface shadow-xs">
-                <Hint label="Copy address">
-                  <button onClick={copyLink} aria-label="Copy website address" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><Copy /></button>
-                </Hint>
-                <Hint label="Share QR code">
-                  <button aria-label="Share QR code" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><QrCode /></button>
-                </Hint>
-                <Hint label="Open live site">
-                  <Link to="/website/preview" aria-label="Open live site" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><ExternalLink /></Link>
-                </Hint>
-              </div>
-            </div>
 
-            {/* live state — one quiet line; the switch is the control */}
-            <div className="mt-5 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <div className="text-micro font-bold uppercase tracking-[0.06em] text-faint">Status</div>
-                <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <StatusBadge status={s.siteLive ? "live" : "off"} className="text-sm font-semibold">{s.siteLive ? "Live" : "Offline"}</StatusBadge>
-                  <span className="text-caption text-muted-foreground">
-                    {s.siteLive ? "Visitors can see it" : "Visitors see a short notice"}
-                  </span>
-                </div>
-              </div>
-              <Switch
-                checked={s.siteLive}
-                onCheckedChange={(v) => { dispatch({ type: "patch", patch: { siteLive: v } }); toast(v ? "Website is live" : "Website taken offline"); }}
-                aria-label={s.siteLive ? "Take website offline" : "Make website live"}
-                className="shrink-0"
-              />
+        {/* primary card — identity dominates; status and utility actions sit
+            beside it in one row now that the canvas is wide enough to hold
+            all three without crowding. Plan/Health are deliberately NOT in
+            here — they're supporting, independent facts, not a continuation
+            of this card (see the row below). */}
+        <Card className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:gap-6">
+          {/* identity — clearly the dominant element */}
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <IconTile icon={<Globe />} tint="blue" size="lg" />
+            <div className="min-w-0">
+              <div className="truncate text-section font-bold leading-tight text-foreground">{OWNER.biz}</div>
+              <a
+                href={`https://${url}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-0.5 inline-block max-w-full truncate font-mono text-caption text-muted-foreground transition-colors hover:text-brand hover:underline"
+              >
+                {url}
+              </a>
             </div>
           </div>
 
-          {/* region 2 — plan & health, a secondary facts strip (deliberately
-              denser and side-by-side, so it reads as one supporting strip
-              under the status line rather than a third look-alike row). */}
-          <div className="grid grid-cols-1 divide-y divide-border-subtle border-t border-border-subtle sm:grid-cols-2 sm:divide-x sm:divide-y-0">
-            <FactCell label="Plan" action={<PanelLink to={advActive ? "/website/plan" : "/website/upgrade"}>{advActive ? "Manage plan" : "See Advanced"}</PanelLink>}>
-              <div className="font-semibold text-foreground">{advActive ? "Advanced" : "Basic — free"}</div>
-              <div className="mt-0.5 text-caption text-muted-foreground">{advActive ? "Every feature is on" : "Upgrade any time"}</div>
-            </FactCell>
-            <FactCell
-              label="Health"
-              attention={health.status === "action" || health.status === "attention"}
-              action={
-                health.status === "ok"
-                  ? <PanelLink to="/website/health">Full report</PanelLink>
-                  : (
-                    <Button asChild variant="outline" size="xs" className="shrink-0">
-                      <Link to="/website/health">Review <ChevronRight /></Link>
-                    </Button>
-                  )
-              }
-            >
-              <StatusBadge status={health.status} className="text-sm font-semibold">{health.label}</StatusBadge>
-              <div className="mt-0.5 truncate text-caption text-muted-foreground">{health.detail}</div>
-            </FactCell>
+          {/* status + the one control that changes it — grouped as a single
+              idea, set off from identity by a rule on wide screens only */}
+          <div className="flex shrink-0 items-center gap-3 self-start lg:self-auto lg:border-x lg:border-border-subtle lg:px-6">
+            <div className="min-w-0">
+              <StatusBadge status={s.siteLive ? "live" : "off"} className="text-section font-bold">
+                {s.siteLive ? "Live" : "Offline"}
+              </StatusBadge>
+              <div className="mt-1 text-caption text-muted-foreground">
+                {s.siteLive ? "Visitors can see it" : "Visitors see a short notice"}
+              </div>
+            </div>
+            <Switch
+              checked={s.siteLive}
+              onCheckedChange={(v) => { dispatch({ type: "patch", patch: { siteLive: v } }); toast(v ? "Website is live" : "Website taken offline"); }}
+              aria-label={s.siteLive ? "Take website offline" : "Make website live"}
+              className="ml-1 shrink-0"
+            />
+          </div>
+
+          {/* utility actions — quieter than the identity/status, grouped as
+              one small control cluster rather than competing individually */}
+          <div className="flex shrink-0 items-center self-start divide-x divide-border overflow-hidden rounded-lg border border-border bg-surface shadow-xs lg:self-auto">
+            <Hint label="Copy address">
+              <button onClick={copyLink} aria-label="Copy website address" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><Copy /></button>
+            </Hint>
+            <Hint label="Share QR code">
+              <button aria-label="Share QR code" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><QrCode /></button>
+            </Hint>
+            <Hint label="Open live site">
+              <Link to="/website/preview" aria-label="Open live site" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><ExternalLink /></Link>
+            </Hint>
           </div>
         </Card>
+
+        {/* supporting row — Health and Plan are sibling facts about the
+            same website, so they share the row equally; which one needs
+            attention is communicated by its own badge/tone, not by giving
+            it more width than its sibling. */}
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <FactCard
+            icon={healthVisual.icon}
+            tint={healthVisual.tint}
+            label="Health"
+            attention={health.status === "action" || health.status === "attention"}
+            action={
+              health.status === "ok"
+                ? <PanelLink to="/website/health">Full report</PanelLink>
+                : (
+                  <Button asChild variant="outline" size="sm" className="shrink-0">
+                    <Link to="/website/health">Review <ChevronRight /></Link>
+                  </Button>
+                )
+            }
+          >
+            <StatusBadge status={health.status} className="text-section font-bold">{health.label}</StatusBadge>
+            <div className="mt-1 truncate text-caption text-muted-foreground">{health.detail}</div>
+          </FactCard>
+          <FactCard
+            icon={<CreditCard />}
+            tint="blue"
+            label="Plan"
+            action={<PanelLink to={advActive ? "/website/plan" : "/website/upgrade"}>{advActive ? "Manage plan" : "See Advanced"}</PanelLink>}
+          >
+            <div className="truncate text-section font-bold text-foreground">{advActive ? "Advanced" : "Basic — free"}</div>
+            <div className="mt-1 text-caption text-muted-foreground">{advActive ? "Every feature is on" : "Upgrade any time"}</div>
+          </FactCard>
+        </div>
       </section>
 
       {/* ================= this week ================= */}
@@ -252,32 +274,55 @@ export function WebsiteHome() {
 
 /* ================= local composition pieces ================= */
 
-/** a compact fact cell for the secondary strip under the status line:
- *  label on its own line, then the value stack, then an optional action —
- *  deliberately vertical (not a row) so it reads as denser, secondary
- *  information rather than a third copy of the primary status row.
- *  `attention` gives the cell a whisper-warm fill when it needs a glance. */
-function FactCell({
-  label, children, action, attention = false,
+/** a standalone supporting-fact card (Plan, Health): icon tile + label,
+ *  then the value stack, then an optional action — the same icon-forward
+ *  language as the "This week"/"Manage" cards below, so Plan/Health read
+ *  as independent facts about the website rather than a continuation of
+ *  the identity card above. `attention` gives it a whisper-warm fill when
+ *  it needs a glance. */
+/** compact dashboard summary/action card — icon anchors one side, the
+    status/value is the main content, the action sits on the opposite side
+    at rest so it never crowds the information above it. Stacks to a plain
+    column only at the same width the outer 50/50 row itself stacks, so the
+    action always has a full-width row to sit in, never a squeezed corner. */
+function FactCard({
+  icon, tint = "blue", label, children, action, attention = false,
 }: {
+  icon?: React.ReactNode;
+  tint?: Tint;
   label: string;
   children: React.ReactNode;
   action?: React.ReactNode;
   attention?: boolean;
 }) {
   return (
-    <div className={cn("min-w-0 bg-surface-2 px-6 py-4", attention && "bg-warning-wash")}>
-      <div className="text-micro font-bold uppercase tracking-[0.06em] text-faint">{label}</div>
-      <div className="mt-1.5 min-w-0 text-sm">{children}</div>
-      {action && <div className="mt-2">{action}</div>}
-    </div>
+    <Card
+      className={cn(
+        "flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5",
+        attention && "border-warning-border bg-warning-wash",
+      )}
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+        <IconTile icon={icon} tint={tint} size="lg" className="shrink-0" />
+        <div className="min-w-0 flex-1 text-sm">
+          <div className="text-micro font-bold uppercase tracking-[0.07em] text-faint">{label}</div>
+          <div className="mt-1 min-w-0">{children}</div>
+        </div>
+      </div>
+      {action && <div className="shrink-0 sm:self-center">{action}</div>}
+    </Card>
   );
 }
 
-/** the interactive text-link used inside a StatPanel */
+/** the interactive text-link used inside a StatPanel — one "chevron
+    text-action" pattern shared with SectionLink below, just anchored in a
+    different place, so every text-only action on the page reads the same. */
 function PanelLink({ to, children }: { to: string; children: React.ReactNode }) {
   return (
-    <Link to={to} className="group/link inline-flex items-center gap-1 text-caption font-semibold text-brand hover:underline">
+    <Link
+      to={to}
+      className="group/link inline-flex items-center gap-1 rounded-sm text-caption font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
       {children}
       <ChevronRight className="size-3.5 transition-transform group-hover/link:translate-x-0.5" />
     </Link>
@@ -287,7 +332,10 @@ function PanelLink({ to, children }: { to: string; children: React.ReactNode }) 
 /** the action shown on the right of a SectionHeader */
 function SectionLink({ to, children }: { to: string; children: React.ReactNode }) {
   return (
-    <Link to={to} className={cn("group/sl inline-flex items-center gap-0.5 text-caption font-semibold text-brand hover:underline")}>
+    <Link
+      to={to}
+      className="group/sl inline-flex items-center gap-1 rounded-sm text-caption font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
       {children}
       <ChevronRight className="size-3.5 transition-transform group-hover/sl:translate-x-0.5" />
     </Link>

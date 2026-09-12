@@ -1,5 +1,5 @@
-import { Plus, Globe } from "lucide-react";
-import { GroupLabel, Callout, Placeholder } from "@/components/common";
+import { Plus, Globe, Info } from "lucide-react";
+import { Page, PageHead, PageBody, Callout, ListContainer, Placeholder } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -16,41 +16,51 @@ const ROWS = [
 
 export function ScheduledVisitsScreen() {
   return (
-    <>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-title font-bold">Scheduled Visits</h1>
-        <Button variant="outline" size="sm"><Plus /> Add visit</Button>
-      </div>
+    // reached directly from the main sidebar, not nested under Website — no
+    // back control, since there's no page above it to return to.
+    <Page size="full">
+      <PageHead
+        title="Scheduled Visits"
+        back={null}
+        actions={
+          <Button variant="outline" size="sm">
+            <Plus /> Add visit
+          </Button>
+        }
+      />
 
-      <Callout tone="info" title="Statuses simplified">
-        Was 11 colours — now 6 that each mean one real thing.
-        <div className="mt-2 flex flex-wrap gap-2">
-          {LEGEND.map(([label, tone]) => (
-            <Badge key={label} variant={tone}>{label}</Badge>
-          ))}
-        </div>
-      </Callout>
-
-      <Placeholder className="my-4 min-h-[120px]">Month calendar — visits coloured by status</Placeholder>
-
-      <div className="overflow-hidden rounded-xl border border-hair border-border bg-card">
-        {ROWS.map((r) => (
-          <div key={r.name} className="flex items-center gap-3 border-b border-border-subtle px-3 py-3 last:border-0">
-            <span className="flex-1">
-              <b>{r.name}</b>
-              <span className="block text-caption text-muted-foreground">{r.when}</span>
-            </span>
-            <Badge variant={r.source === "Website" ? "success" : "neutral"}>
-              {r.source === "Website" && <Globe />} {r.source}
-            </Badge>
-            <Badge variant={r.tone as never}>{r.status}</Badge>
+      <PageBody>
+        <Callout tone="info" icon={<Info className="size-4" />} title="Statuses simplified">
+          Was 11 colours — now 6 that each mean one real thing.
+          <div className="mt-2 flex flex-wrap gap-2">
+            {LEGEND.map(([label, tone]) => (
+              <Badge key={label} variant={tone}>{label}</Badge>
+            ))}
           </div>
-        ))}
-      </div>
+        </Callout>
 
-      <p className="mt-3 text-body text-muted-foreground">
-        The <Badge variant="success"><Globe /> Website</Badge> tag shows which visits your site brought in — visible in month, week and list views.
-      </p>
-    </>
+        <Placeholder className="min-h-[120px]">Month calendar — visits coloured by status</Placeholder>
+
+        <ListContainer>
+          {ROWS.map((r) => (
+            <div key={r.name} className="flex items-center gap-3 px-4 py-3">
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold text-foreground">{r.name}</span>
+                <span className="block text-caption text-muted-foreground">{r.when}</span>
+              </span>
+              <Badge variant={r.source === "Website" ? "success" : "neutral"}>
+                {r.source === "Website" && <Globe />} {r.source}
+              </Badge>
+              <Badge variant={r.tone as never}>{r.status}</Badge>
+            </div>
+          ))}
+        </ListContainer>
+
+        <Callout tone="info" icon={<Info className="size-4" />}>
+          The <Badge variant="success"><Globe /> Website</Badge> tag shows which visits your site brought in — visible in
+          month, week and list views.
+        </Callout>
+      </PageBody>
+    </Page>
   );
 }

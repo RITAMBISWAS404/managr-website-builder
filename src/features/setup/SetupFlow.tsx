@@ -23,7 +23,7 @@ function Progress({ step }: { step: number }) {
           className={cn(
             "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-caption font-semibold",
             i < step && "border-success-border bg-success-surface text-success",
-            i === step && "border-brand bg-brand/10 text-brand",
+            i === step && "border-brand bg-tint-coral text-brand",
             i > step && "border-hair bg-secondary text-muted-foreground",
           )}
         >

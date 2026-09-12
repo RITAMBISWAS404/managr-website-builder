@@ -25,14 +25,17 @@ export function PageHead({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-5">
+    // one shared shell for every Website sub-page: a refined compact back
+    // control, deliberate breathing room before the title, and a larger,
+    // consistent gap before whatever content follows — so no page has to
+    // hand-tune this rhythm on its own.
+    <div className="mb-7 sm:mb-8">
       {back && (
-        <Link
-          to={back}
-          className="mb-2.5 -ml-1 inline-flex items-center gap-1 text-caption font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ChevronLeft className="size-3.5" /> {backLabel}
-        </Link>
+        <Button asChild variant="outline" size="sm" className="mb-5 sm:mb-6">
+          <Link to={back}>
+            <ChevronLeft className="size-3.5" /> {backLabel}
+          </Link>
+        </Button>
       )}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -282,7 +285,7 @@ export function AdvancedLock({
   onNotNow?: () => void;
 }) {
   return (
-    <div className="rounded-2xl border border-advanced-border bg-advanced-surface p-4">
+    <div className="max-w-[640px] rounded-2xl border border-advanced-border bg-advanced-surface p-4">
       <div className="flex items-center gap-1.5 text-caption font-semibold uppercase text-advanced">
         <Sparkles className="size-3.5" /> Available with Advanced
       </div>
@@ -343,6 +346,54 @@ export function ChoiceRow({
 }
 export function ChoiceGroup({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("space-y-2", className)}>{children}</div>;
+}
+
+/* ---------- selectable card — vertical sibling to ChoiceRow, for a compact
+   multi-column choice grid (title + control on one line, then description)
+   instead of a full-width row. Same border-only selection language. ---------- */
+export function ChoiceCard({
+  title,
+  description,
+  control,
+  selected,
+  onClick,
+  as = "label",
+  className,
+}: {
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  control?: React.ReactNode;
+  selected?: boolean;
+  onClick?: () => void;
+  as?: "label" | "button" | "div";
+  className?: string;
+}) {
+  const Comp = as as React.ElementType;
+  return (
+    <Comp
+      onClick={onClick}
+      className={cn(
+        "flex flex-col gap-1.5 rounded-lg border bg-surface p-3.5 text-left text-body transition-colors",
+        onClick || as === "label" ? "cursor-pointer" : "",
+        selected ? "border-brand" : "border-border hover:bg-surface-2",
+        className,
+      )}
+    >
+      <span className="flex items-start justify-between gap-2">
+        <span className="font-medium leading-snug text-foreground">{title}</span>
+        {/* flex + items-center, not inline baseline layout: a radio's
+            checked state renders an extra indicator element inside it,
+            which shifts its own inline baseline and previously dropped it
+            a few px lower than its unchecked siblings. A flex wrapper with
+            an explicit alignment is deterministic regardless of what the
+            control renders internally. */}
+        {control && (
+          <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center">{control}</span>
+        )}
+      </span>
+      {description && <span className="text-caption leading-relaxed text-muted-foreground">{description}</span>}
+    </Comp>
+  );
 }
 
 /* ---------- status badge (dot + text, optionally a solid pill) ---------- */
@@ -503,9 +554,16 @@ export function Page({
   children, size = "content", className,
 }: {
   children: React.ReactNode;
-  /** content: forms/prose that read best at a comfortable width (Availability, Booking requests).
-   *  wide: pages with a real internal grid that wants more room (Settings' two-column fields, Visits' schedule grid).
-   *  full: pages with a genuine table that should use the workspace's available width (Enquiries). */
+  /** content: a genuinely narrow, focused decision page — e.g. Upgrade's plan-cycle picker.
+   *  wide: reserved for a page whose real content wants more than content-width but less
+   *  than the full workspace canvas (no current page needs this — most content that once
+   *  used "wide" turned out to be full-canvas-appropriate once its inner fields/grids were
+   *  capped for readability, see SettingsCard usages below).
+   *  full: the default for ordinary Website workspace pages — matches the shell's own
+   *  canvas width (Settings, Availability, Visits, Bookings, Enquiries, Health, Plan,
+   *  Analytics). Individual fields/grids/prose inside a card still cap their own width
+   *  (e.g. `max-w-[820px]` on a field grid, `max-w-[640px]` on AdvancedLock/a Callout) so
+   *  the card itself uses the canvas while its readable content doesn't stretch edge to edge. */
   size?: "content" | "wide" | "full";
   className?: string;
 }) {
@@ -541,7 +599,13 @@ export function SettingsCard({
   className?: string;
 }) {
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    // flex-col + h-full: inert in normal block flow (an auto-height parent
+    // just gives h-full = auto, so this changes nothing on the many pages
+    // that use SettingsCard standalone) — but lets the card participate
+    // correctly in a `stretch` grid row (see the Contact/Social pairing),
+    // growing to match a taller sibling while its own content stays
+    // top-anchored and any footer still pins to the card's bottom edge.
+    <Card className={cn("flex h-full flex-col overflow-hidden", className)}>
       <div className="flex items-start gap-3 border-b border-border-subtle p-4 sm:px-5 sm:py-4">
         {icon && <IconTile icon={icon} tint={tint} size="md" className="mt-0.5" />}
         <div className="min-w-0 flex-1">
@@ -552,7 +616,9 @@ export function SettingsCard({
         </div>
         {action && <div className="shrink-0 pl-1">{action}</div>}
       </div>
-      {React.Children.toArray(children).length > 0 && <div className="space-y-4 p-4 sm:p-5">{children}</div>}
+      {React.Children.toArray(children).length > 0 && (
+        <div className="flex-1 space-y-4 p-4 sm:p-5">{children}</div>
+      )}
       {footer && (
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border-subtle bg-surface-2 px-4 py-3 text-caption text-muted-foreground sm:px-5">
           {footer}

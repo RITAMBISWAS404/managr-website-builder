@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Eye, MessageCircle, PhoneCall, Inbox, CalendarClock, IndianRupee } from "lucide-react";
-import { Page, PageHead, PageBody, SectionHeader, MetricCard, SettingsCard, AdvancedLock, type Tint } from "@/components/common";
+import { Page, PageHead, PageBody, SectionHeader, MetricCard, SettingsCard, AdvancedLock, Stat, type Tint } from "@/components/common";
+import { cn } from "@/lib/utils";
 import { useDerived } from "@/store/hooks";
 
 export function AnalyticsScreen() {
@@ -19,13 +20,13 @@ export function AnalyticsScreen() {
   ];
 
   return (
-    <Page size="wide">
+    <Page size="full">
       <PageHead title="What your website is doing" description="Plain numbers — no charts to read." />
 
       <PageBody>
         <section>
           <SectionHeader>This week</SectionHeader>
-          <div className={`grid grid-cols-2 gap-2.5 sm:grid-cols-3 ${advActive ? "lg:grid-cols-5" : ""}`}>
+          <div className={cn("grid grid-cols-2 gap-3 sm:grid-cols-3", advActive && "xl:grid-cols-5")}>
             {week.map((m) => (
               <MetricCard key={m.label} icon={m.icon} tint={m.tint} value={m.value} label={m.label} />
             ))}
@@ -39,7 +40,7 @@ export function AnalyticsScreen() {
           title="Roughly what it brought in"
           description="3 move-ins started with a website visit or booking."
         >
-          <div className="text-display font-bold tabular-nums text-foreground">₹1,10,000 this month</div>
+          <Stat value="₹1,10,000" label="this month" />
         </SettingsCard>
 
         {!advActive && (

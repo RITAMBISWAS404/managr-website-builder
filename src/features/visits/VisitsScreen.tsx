@@ -6,7 +6,6 @@ import {
   Page,
   PageBody,
   SettingsCard,
-  Field,
   FieldGroup,
   ToggleField,
   ListContainer,
@@ -34,9 +33,16 @@ const PRESETS: Record<string, (d: number, slot: string) => boolean> = {
   Weekends: (d) => d >= 5,
 };
 
+const RULES = [
+  ["Show a room this many days before it frees up", "leadDays"],
+  ["Visitors allowed per time slot", "perSlot"],
+  ["Least notice needed (hours)", "notice"],
+  ["How far ahead people can book (days)", "horizon"],
+] as const;
+
 function Stepper({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   return (
-    <span className="inline-flex items-center overflow-hidden rounded-lg border border-border">
+    <span className="inline-flex shrink-0 items-center overflow-hidden rounded-lg border border-border">
       <button
         type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
@@ -77,7 +83,7 @@ export function VisitsScreen() {
 
   if (!advActive)
     return (
-      <Page>
+      <Page size="full">
         <PageHead title="Visit settings" description="Let visitors book a viewing themselves." />
         <AdvancedLock
           feature="Visit booking"
@@ -103,7 +109,7 @@ export function VisitsScreen() {
   };
 
   return (
-    <Page size="wide">
+    <Page size="full">
       <PageHead
         title="Visit settings"
         description="Your scheduling control centre. The common case is two steps — pick days, pick times."
@@ -116,57 +122,67 @@ export function VisitsScreen() {
           title="When people can visit"
           description="Tap the blocks that work for you, then choose the exact times to offer inside them."
         >
-          <Field label="Add a common pattern">
-            <div className="flex flex-wrap gap-2">
+          {/* schedule — the primary decision on this card, now sized to
+              the card's actual width rather than an arbitrary cap: the
+              label column has a comfortable min/max, the three day-part
+              columns share whatever room remains equally. Quick patterns
+              stay a compact secondary toolbar on the same row as the
+              label, not a peer field competing with the grid below. */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div className="text-sm font-semibold text-foreground">Days &amp; parts of day</div>
+            <div className="flex flex-wrap items-center gap-1.5">
               {Object.keys(PRESETS).map((p) => (
-                <Button key={p} variant="outline" size="sm" onClick={() => applyPreset(p)}>
-                  <Plus /> {p}
+                <Button key={p} variant="outline" size="xs" onClick={() => applyPreset(p)}>
+                  <Plus className="size-3" /> {p}
                 </Button>
               ))}
             </div>
-          </Field>
+          </div>
 
-          <Field label="Days & parts of day">
-            <div
-              role="group"
-              aria-label="Days and parts of day visitors can book"
-              className="grid max-w-[620px] grid-cols-[64px_repeat(3,1fr)] gap-2 text-caption"
-            >
-              <span />
-              {SLOTS.map((slot) => (
-                <span key={slot} className="pb-1 text-center font-semibold text-faint">
-                  {slot}
-                </span>
-              ))}
-              {DAYS.map((d, i) => (
-                <React.Fragment key={d}>
-                  <span className="flex items-center font-bold text-muted-foreground">{d}</span>
-                  {SLOTS.map((slot) => {
-                    const on = grid[key(i, slot)];
-                    return (
-                      <button
-                        key={slot}
-                        type="button"
-                        aria-pressed={on}
-                        aria-label={`${DAYS[i]} ${slot} ${on ? "on" : "off"}`}
-                        onClick={() => setGrid((g) => ({ ...g, [key(i, slot)]: !g[key(i, slot)] }))}
-                        className={cn(
-                          "min-h-[42px] rounded-lg text-sm font-semibold transition-colors",
-                          on
-                            ? "bg-brand text-primary-foreground"
-                            : "bg-sunken text-faint hover:bg-[#e9ebef]",
-                        )}
-                      >
-                        {on ? "On" : "—"}
-                      </button>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
-            </div>
-          </Field>
+          <div
+            role="group"
+            aria-label="Days and parts of day visitors can book"
+            className="grid grid-cols-[minmax(64px,120px)_repeat(3,1fr)] gap-3 text-caption sm:gap-4"
+          >
+            <span />
+            {SLOTS.map((slot) => (
+              <span key={slot} className="pb-1 text-center font-semibold text-faint">
+                {slot}
+              </span>
+            ))}
+            {DAYS.map((d, i) => (
+              <React.Fragment key={d}>
+                <span className="flex items-center font-bold text-muted-foreground">{d}</span>
+                {SLOTS.map((slot) => {
+                  const on = grid[key(i, slot)];
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      aria-pressed={on}
+                      aria-label={`${DAYS[i]} ${slot} ${on ? "on" : "off"}`}
+                      onClick={() => setGrid((g) => ({ ...g, [key(i, slot)]: !g[key(i, slot)] }))}
+                      className={cn(
+                        "min-h-[46px] rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2",
+                        on
+                          ? "bg-brand text-primary-foreground"
+                          : "bg-sunken text-faint hover:bg-[#e9ebef]",
+                      )}
+                    >
+                      {on ? "On" : "—"}
+                    </button>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </div>
 
-          <Field label="Exact times to offer">
+          {/* secondary — a different configuration layer than the schedule
+              above, set apart in the same quiet inset panel used elsewhere
+              in the refined workspace for "configuration of the decision
+              above" content. Same full width as the grid above it now. */}
+          <div className="rounded-xl bg-surface-2 p-4 sm:p-5">
+            <div className="mb-3 text-micro font-bold uppercase tracking-[0.07em] text-faint">Exact times to offer</div>
             <div role="group" aria-label="Exact visit times to offer" className="flex flex-wrap gap-2">
               {TIMES.map((t) => (
                 <button
@@ -175,17 +191,17 @@ export function VisitsScreen() {
                   aria-pressed={times[t]}
                   onClick={() => setTimes((x) => ({ ...x, [t]: !x[t] }))}
                   className={cn(
-                    "rounded-full border px-3 py-1 text-caption transition-colors",
+                    "rounded-full border px-3 py-1 text-caption transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2",
                     times[t]
                       ? "border-brand bg-tint-coral font-semibold text-foreground"
-                      : "border-border-subtle font-medium text-muted-foreground hover:bg-surface-2",
+                      : "border-border-subtle bg-surface font-medium text-muted-foreground hover:bg-surface-2",
                   )}
                 >
                   {t}
                 </button>
               ))}
             </div>
-          </Field>
+          </div>
         </SettingsCard>
 
         <SettingsCard
@@ -281,32 +297,32 @@ export function VisitsScreen() {
           title="Timing rules"
           description="Defaults shown — a product decision to confirm."
         >
-          <FieldGroup>
-            {(
-              [
-                ["Show a room this many days before it frees up", "leadDays"],
-                ["Visitors allowed per time slot", "perSlot"],
-                ["Least notice needed (hours)", "notice"],
-                ["How far ahead people can book (days)", "horizon"],
-              ] as const
-            ).map(([label, k]) => (
-              <ToggleField
+          {/* each rule is its own tight label+stepper pairing rather than a
+              full-width row with a small control stranded at the far edge —
+              and a 2-up grid halves the vertical scroll these four rules
+              used to take. */}
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            {RULES.map(([label, k]) => (
+              <div
                 key={k}
-                label={label}
-                control={
-                  <Stepper value={rules[k]} onChange={(n) => setRules((r) => ({ ...r, [k]: n }))} />
-                }
-              />
+                className="flex items-center justify-between gap-3 rounded-lg border border-border-subtle px-4 py-3"
+              >
+                <span className="text-sm font-medium text-foreground">{label}</span>
+                <Stepper value={rules[k]} onChange={(n) => setRules((r) => ({ ...r, [k]: n }))} />
+              </div>
             ))}
-          </FieldGroup>
+          </div>
         </SettingsCard>
 
+        {/* full-width card, capped reading width for the prose only */}
         <Callout tone="info" icon={<Info className="size-4" />} title="Where this shows up">
-          These settings power the <b>Visit booking</b> section on your website, and every booking appears in{" "}
-          <Link to="/scheduled-visits" className="font-semibold text-brand">
-            Scheduled Visits
-          </Link>{" "}
-          with a “Website” tag.
+          <span className="block max-w-[760px]">
+            These settings power the <b>Visit booking</b> section on your website, and every booking appears in{" "}
+            <Link to="/scheduled-visits" className="font-semibold text-brand">
+              Scheduled Visits
+            </Link>{" "}
+            with a “Website” tag.
+          </span>
         </Callout>
       </PageBody>
     </Page>

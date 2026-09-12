@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Lock, Check, Minus, CreditCard } from "lucide-react";
-import { Page, PageHead, PageBody, SettingsCard, Callout } from "@/components/common";
+import { Page, PageHead, PageBody, SettingsCard, SectionHeader, Callout } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useS, useDerived } from "@/store/hooks";
 
@@ -42,7 +42,7 @@ export function PlanScreen() {
   const plan = PLAN_COPY[s.plan];
 
   return (
-    <Page>
+    <Page size="full">
       <PageHead title="Plan & billing" description="Basic is free. Advanced turns the site into a working front desk." />
 
       <PageBody>
@@ -60,11 +60,11 @@ export function PlanScreen() {
         </SettingsCard>
 
         <section>
-          <div className="mb-2 pl-0.5 text-micro font-bold uppercase tracking-[0.07em] text-faint">What's in each plan</div>
+          <SectionHeader>What's in each plan</SectionHeader>
           <div className="overflow-x-auto rounded-xl border border-border bg-surface">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-border-subtle text-micro font-bold uppercase tracking-[0.06em] text-faint">
+                <tr className="border-b border-border-subtle text-micro font-bold uppercase tracking-[0.07em] text-faint">
                   <th className="px-4 py-2.5 font-bold">Capability</th>
                   <th className="w-20 px-2 py-2.5 text-center font-bold">Basic</th>
                   <th className="w-20 px-2 py-2.5 text-center font-bold">Advanced</th>
