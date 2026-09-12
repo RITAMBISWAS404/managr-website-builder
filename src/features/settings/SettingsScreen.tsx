@@ -76,12 +76,19 @@ export function SettingsScreen() {
 
               <div className="lg:border-l lg:border-border-subtle lg:pl-10">
                 <Field label="Your web address" hint="Set for good — it goes on your boards and into WhatsApp groups.">
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface-2 px-3.5 py-2.5">
-                    <span className="flex items-center gap-1.5 font-mono text-sm text-foreground">
-                      <Lock className="size-3.5 text-faint" /> {url}
+                  {/* deliberate mobile stacking, not accidental wrap: the
+                      address gets its own full-width line (it's the fact
+                      that matters and is often the widest thing in the
+                      card), the action drops to its own row below rather
+                      than being squeezed onto whatever space wrapping left
+                      beside it. Reverts to one row from sm up. */}
+                  <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                    <span className="flex min-w-0 items-center gap-1.5 font-mono text-sm text-foreground">
+                      <Lock className="size-3.5 shrink-0 text-faint" />
+                      <span className="truncate">{url}</span>
                     </span>
-                    <Button variant="ghost" size="sm" className="shrink-0">
-                      Need to change it?
+                    <Button variant="ghost" size="sm" className="shrink-0 self-start sm:self-auto">
+                      Contact support
                     </Button>
                   </div>
                 </Field>

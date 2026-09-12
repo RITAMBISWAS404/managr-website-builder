@@ -92,12 +92,18 @@ export function AvailabilityScreen() {
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-3 self-start sm:self-auto sm:border-l sm:border-border-subtle sm:pl-6">
+          {/* status + control read as a continuation of the setting above,
+              not a second detached block: a border-t marks the boundary on
+              mobile (same idiom as Website Home's "Website visibility"),
+              full-width justify-between so the switch anchors to a true
+              edge; reverts to a content-width group with a border-l once
+              the card goes horizontal at sm. */}
+          <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-4 shrink-0 sm:justify-start sm:border-t-0 sm:border-l sm:border-border-subtle sm:pl-6 sm:pt-0">
             <div className="min-w-0">
               <StatusBadge status={s.availOn ? "live" : "off"} className="text-sm font-semibold">
                 {s.availOn ? "On" : "Off"}
               </StatusBadge>
-              <div className="mt-1 text-caption text-muted-foreground">
+              <div className="mt-0.5 text-caption text-muted-foreground">
                 {s.availOn ? "Visible on property pages" : "Hidden from visitors"}
               </div>
             </div>
@@ -118,14 +124,16 @@ export function AvailabilityScreen() {
               title="What visitors see"
               description="How much detail to reveal. You can dial this up later once you're comfortable."
             >
-              {/* primary decision — a 3-up choice grid on desktop instead of
-                  three full-width rows, so title/description/example sit
-                  close together rather than stretched across a huge gap to
-                  a far-right radio dot. Border-only selection, unchanged. */}
+              {/* primary decision — each option carries a title, a
+                  description and a "Visitor sees" example, so 3 columns
+                  only from xl, once there's genuinely enough width per card
+                  for that much text; 2 columns from sm keeps every card
+                  comfortably readable rather than cramming three dense
+                  cards into a narrow row. Border-only selection, unchanged. */}
               <RadioGroup
                 value={s.availLevel}
                 onValueChange={(v) => set({ availLevel: v as never })}
-                className="grid gap-2.5 sm:grid-cols-3"
+                className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3"
               >
                 {LEVELS.map((l) => (
                   <ChoiceCard
@@ -209,7 +217,6 @@ export function AvailabilityScreen() {
                   const stale = staleProp(s, p);
                   const fr = freshness(p.updatedDaysAgo);
                   const off = p.status !== "live";
-                  const hidden = off || fr === "stale";
                   const line = off
                     ? p.status === "review"
                       ? "Under review — hidden from your site"
@@ -219,34 +226,36 @@ export function AvailabilityScreen() {
                       : fr === "slightly"
                         ? `Updated ${p.updatedDaysAgo} days ago — still shown`
                         : `Not updated in ${p.updatedDaysAgo} days — hidden until staff refresh it`;
+                  // off = administratively hidden (gray); a stale or
+                  // slightly-aging freshness is worth a glance even though
+                  // it isn't hidden outright (amber); a genuinely fresh
+                  // property gets no dot at all — restrained, not a badge
+                  // on every row.
+                  const statusTone: "off" | "attention" | null = off ? "off" : fr !== "fresh" ? "attention" : null;
                   return (
-                    // name on its own line, status + switch as a deliberate
-                    // second row below `sm` — a long freshness message (e.g.
-                    // "Not updated in 22 days…") no longer has to compete
-                    // with the switch for the same line; both get their own
-                    // full-width row, status left / switch right, rather
-                    // than wrapping into whatever room happened to be left.
-                    <div
-                      key={p.id}
-                      className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
-                    >
-                      <label htmlFor={`avail-prop-${p.id}`} className={cn("min-w-0", !off && "cursor-pointer")}>
+                    // name + status form one left-anchored column at every
+                    // width, so the toggle's horizontal position never
+                    // depends on how long the status sentence is — this
+                    // single structure already works from 375px to 1440px,
+                    // it doesn't need a separate mobile composition.
+                    <div key={p.id} className="flex items-start justify-between gap-3 px-4 py-3">
+                      <label htmlFor={`avail-prop-${p.id}`} className={cn("min-w-0 flex-1", !off && "cursor-pointer")}>
                         <span className="block font-medium text-foreground">{p.name}</span>
-                      </label>
-                      <div className="flex items-center justify-between gap-3 sm:shrink-0">
-                        {hidden ? (
-                          <StatusBadge status={off ? "off" : "attention"} className="text-caption">
+                        {statusTone ? (
+                          <StatusBadge status={statusTone} className="mt-0.5 text-caption">
                             {line}
                           </StatusBadge>
                         ) : (
-                          <span className="text-caption text-muted-foreground">{line}</span>
+                          <span className="mt-0.5 block text-caption text-muted-foreground">{line}</span>
                         )}
-                        <Switch
-                          id={`avail-prop-${p.id}`}
-                          defaultChecked={p.status === "live" && !stale}
-                          disabled={off}
-                        />
-                      </div>
+                      </label>
+                      <Switch
+                        id={`avail-prop-${p.id}`}
+                        defaultChecked={p.status === "live" && !stale}
+                        disabled={off}
+                        aria-label={`Show availability for ${p.name}`}
+                        className="mt-0.5 shrink-0"
+                      />
                     </div>
                   );
                 })}
