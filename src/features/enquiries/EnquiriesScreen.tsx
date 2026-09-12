@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Globe, Copy, Info, Search, Inbox } from "lucide-react";
+import { Copy, Info, Search, Inbox } from "lucide-react";
 import {
   PageHead,
   Page,
@@ -9,7 +9,7 @@ import {
   FilterBar,
   ListContainer,
   Segmented,
-  Callout,
+  IconTile,
   EmptyState,
   AdvancedLock,
 } from "@/components/common";
@@ -57,25 +57,26 @@ export function EnquiriesScreen() {
       <PageHead title="Enquiries" description="Leads that came from your website — manage them here or in your CRM." />
 
       <PageBody>
-        {/* the first thing on the page, always — a contextual callout, not
-            a statistic. Where enquiries go doesn't depend on how many
-            there are, so it no longer needs two near-duplicate branches;
-            one composition serves the empty state and the working state
-            alike, text and CTA balanced in a single row on wider screens. */}
-        <Callout tone="info" icon={<Info className="size-4" />} title="Where enquiries go">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
-            <p className="sm:max-w-[640px]">
-              Every one becomes a lead in <b>Leads &amp; CRM</b>, tagged{" "}
-              <Badge variant="success">
-                <Globe /> Website
-              </Badge>{" "}
-              so it stands out from marketplace leads — and it cost you nothing.
+        {/* a compact action card, not a documentation callout — the same
+            architecture as Website Home's "You have changes to publish"
+            (icon + title + one concise line, action trailing), just without
+            its brand-ring emphasis: this is routine information, not
+            something that needs attention. Doesn't depend on how many
+            enquiries there are, so it no longer needs a separate empty-state
+            branch. */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 shadow-e1 sm:flex-row sm:items-center sm:gap-4 sm:p-6">
+          <IconTile icon={<Info />} tint="blue" size="lg" className="shadow-xs" />
+          <div className="min-w-0 flex-1">
+            <div className="text-section font-semibold text-foreground">Where enquiries go</div>
+            <p className="mt-0.5 text-body text-muted-foreground">
+              Every enquiry becomes a lead in <span className="text-foreground">Leads &amp; CRM</span>, tagged
+              “Website”.
             </p>
-            <Button variant="outline" size="sm" className="shrink-0 self-start sm:self-center">
-              Open Leads &amp; CRM
-            </Button>
           </div>
-        </Callout>
+          <Button variant="outline" className="w-full shrink-0 sm:w-auto">
+            Open Leads &amp; CRM
+          </Button>
+        </div>
 
         {all.length === 0 ? (
           <EmptyState
@@ -175,7 +176,7 @@ export function EnquiriesScreen() {
                       <div className="min-w-0">
                         <div className="font-semibold text-foreground">{r.name}</div>
                         <div className="mt-0.5 text-caption text-muted-foreground">{r.detail}</div>
-                        <div className="mt-1 text-caption tabular-nums text-faint">{r.when}</div>
+                        <div className="mt-1 text-caption tabular-nums text-muted-foreground">{r.when}</div>
                       </div>
                       <Badge variant={STATUS_BADGE[r.status] ?? "neutral"}>{r.status}</Badge>
                     </div>

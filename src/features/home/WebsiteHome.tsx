@@ -78,7 +78,10 @@ export function WebsiteHome() {
       <header className="flex flex-wrap items-start justify-between gap-x-5 gap-y-3">
         <div className="min-w-0">
           <h1 className="text-display font-bold tracking-tight text-foreground">Website</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          {/* matches PageHead's own subtitle treatment exactly (text-body,
+              mt-1.5) — this hand-rolled header must track that component
+              since it doesn't use it directly, same as the h1 above it. */}
+          <p className="mt-1.5 max-w-prose text-body text-muted-foreground">
             {advActive ? "Advanced plan" : "Basic plan · free"}
             {lastPub && <> · published {relTime(lastPub)}</>}
           </p>
@@ -102,22 +105,25 @@ export function WebsiteHome() {
 
       {/* ================= one thing to do next ================= */}
       {next && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-ring-soft bg-surface p-5 shadow-e1 sm:flex-row sm:items-center sm:gap-4 sm:p-6">
-          <IconTile icon={next.icon} tint={next.tint} size="lg" className="shadow-xs" />
-          <div className="min-w-0 flex-1">
-            {/* "Next" only signalled sequence, not urgency, and didn't fit
-                all three states this card can show (fixing an issue vs.
-                publishing vs. no properties yet) — "Needs attention" reads
-                correctly for all three and reuses the same word Health
-                already uses for this exact semantic state. */}
-            <div className="text-micro font-bold uppercase tracking-[0.07em] text-brand">Needs attention</div>
-            <div className="mt-1 text-section font-semibold text-foreground">{next.title}</div>
-            <p className="mt-0.5 text-body text-muted-foreground">{next.body}</p>
+        <section>
+          {/* the same section-label convention as "Your website"/"This
+              week" below — a contextual eyebrow above the card, not card
+              content. "Needs attention" (not "Next") reads correctly across
+              all three states this card can show (fixing an issue vs.
+              publishing vs. no properties yet), reusing the same word
+              Health already uses for this exact semantic state. */}
+          <SectionHeader>Needs attention</SectionHeader>
+          <div className="flex flex-col gap-3 rounded-2xl border border-ring-soft bg-surface p-5 shadow-e1 sm:flex-row sm:items-center sm:gap-4 sm:p-6">
+            <IconTile icon={next.icon} tint={next.tint} size="lg" className="shadow-xs" />
+            <div className="min-w-0 flex-1">
+              <div className="text-section font-semibold text-foreground">{next.title}</div>
+              <p className="mt-0.5 text-body text-muted-foreground">{next.body}</p>
+            </div>
+            <Button variant="primary" className="w-full shrink-0 sm:w-auto" onClick={() => nav(next.to)}>
+              {next.cta} <ArrowRight />
+            </Button>
           </div>
-          <Button variant="primary" className="w-full shrink-0 sm:w-auto" onClick={() => nav(next.to)}>
-            {next.cta} <ArrowRight />
-          </Button>
-        </div>
+        </section>
       )}
 
       {/* ================= your website ================= */}

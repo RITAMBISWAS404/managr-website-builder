@@ -95,6 +95,7 @@ export const MOCK_ENQUIRIES: Enquiry[] = [
 
 export const MOCK_REQUESTS: BookingRequest[] = [
   { id: "b1", name: "Aditya", detail: "Double sharing · Shree Residency", moveIn: "2 March", status: "Awaiting your decision" },
+  { id: "b2", name: "Rohan", detail: "Single sharing · Green Nest PG", moveIn: "9 March", status: "Awaiting your decision" },
 ];
 
 export const RESERVED_SLUGS = ["admin", "api", "www", "managr", "bedr", "help", "support", "app", "test", "new"];

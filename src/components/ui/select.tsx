@@ -50,12 +50,13 @@ SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & { description?: React.ReactNode }
+>(({ className, children, description, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-body outline-none focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none rounded-md py-1.5 pl-8 pr-2 text-body outline-none focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      description ? "flex-col items-start gap-0.5" : "items-center",
       className,
     )}
     {...props}
@@ -65,7 +66,14 @@ const SelectItem = React.forwardRef<
         <Check className="size-4" />
       </SelectPrimitive.ItemIndicator>
     </span>
+    {/* only the text inside ItemText is mirrored into the closed trigger's
+        SelectValue — `description`, a plain sibling, stays visible in the
+        open list only, so a longer explanatory line never leaks into the
+        collapsed control. */}
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    {description && (
+      <span className="text-caption font-normal leading-snug text-muted-foreground">{description}</span>
+    )}
   </SelectPrimitive.Item>
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;

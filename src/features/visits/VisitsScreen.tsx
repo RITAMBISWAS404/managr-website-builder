@@ -8,7 +8,6 @@ import {
   SettingsCard,
   FieldGroup,
   ToggleField,
-  ListContainer,
   Callout,
   AdvancedLock,
 } from "@/components/common";
@@ -16,6 +15,16 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetBody,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useS, useDerived } from "@/store/hooks";
 import { publicProperties } from "@/store/selectors";
@@ -76,9 +85,20 @@ export function VisitsScreen() {
   const [times, setTimes] = React.useState<Record<string, boolean>>(() =>
     Object.fromEntries(TIMES.map((t, i) => [t, i !== 2])),
   );
-  const [blackouts, setBlackouts] = React.useState(["2 Oct — Gandhi Jayanti", "21–23 Oct — travelling"]);
+  // `date` is the already-formatted display string (a single day, e.g.
+  // "2 Oct", or a pre-set range like "21–23 Oct" — the create flow below
+  // only ever produces single dates; existing range entries are preserved
+  // as-is since there's no range picker to reconstruct them from).
+  // `reason` is genuinely optional — the two seed entries show why it's
+  // worth having, the create flow now actually lets the owner add one.
+  const [blackouts, setBlackouts] = React.useState<{ id: string; date: string; reason?: string }[]>([
+    { id: "b1", date: "2 Oct", reason: "Gandhi Jayanti" },
+    { id: "b2", date: "21–23 Oct", reason: "travelling" },
+  ]);
   const [newDate, setNewDate] = React.useState("");
+  const [newReason, setNewReason] = React.useState("");
   const [addOpen, setAddOpen] = React.useState(false);
+  const [addSheetOpen, setAddSheetOpen] = React.useState(false);
   const [rules, setRules] = React.useState({ leadDays: 7, perSlot: 2, notice: 3, horizon: 21 });
 
   if (!advActive)
@@ -102,11 +122,15 @@ export function VisitsScreen() {
 
   const addBlackout = () => {
     if (!newDate) return;
-    const label = new Date(newDate + "T00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-    setBlackouts((b) => [...b, label]);
+    const date = new Date(newDate + "T00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    setBlackouts((b) => [...b, { id: crypto.randomUUID(), date, reason: newReason.trim() || undefined }]);
     setNewDate("");
+    setNewReason("");
     setAddOpen(false);
+    setAddSheetOpen(false);
   };
+
+  const removeBlackout = (id: string) => setBlackouts((b) => b.filter((x) => x.id !== id));
 
   return (
     <Page size="full">
@@ -139,10 +163,17 @@ export function VisitsScreen() {
             </div>
           </div>
 
+          {/* the day-label column is a fixed track (not a minmax with a
+              loose upper bound) so it can never absorb the grid's leftover
+              free space during track sizing — that absorption, not any
+              margin/padding, was the actual cause of the old gap before
+              "Morning". A fixed track can only ever be exactly as wide as
+              its own value, so the 3 day-part columns get all the room
+              they're due. */}
           <div
             role="group"
             aria-label="Days and parts of day visitors can book"
-            className="grid grid-cols-[minmax(64px,120px)_repeat(3,1fr)] gap-3 text-caption sm:gap-4"
+            className="grid grid-cols-[40px_repeat(3,1fr)] gap-2 text-caption sm:grid-cols-[64px_repeat(3,1fr)] sm:gap-4"
           >
             <span />
             {SLOTS.map((slot) => (
@@ -177,12 +208,12 @@ export function VisitsScreen() {
             ))}
           </div>
 
-          {/* secondary — a different configuration layer than the schedule
-              above, set apart in the same quiet inset panel used elsewhere
-              in the refined workspace for "configuration of the decision
-              above" content. Same full width as the grid above it now. */}
-          <div className="rounded-xl bg-surface-2 p-4 sm:p-5">
-            <div className="mb-3 text-micro font-bold uppercase tracking-[0.07em] text-faint">Exact times to offer</div>
+          {/* secondary — its own distinct section, marked with a divider
+              rather than an eyebrow; "Exact times to offer" is a setting in
+              its own right (same text-sm font-semibold role as "Days &
+              parts of day" above it), not an implementation label. */}
+          <div className="border-t border-border-subtle pt-4">
+            <div className="mb-3 text-sm font-semibold text-foreground">Exact times to offer</div>
             <div role="group" aria-label="Exact visit times to offer" className="flex flex-wrap gap-2">
               {TIMES.map((t) => (
                 <button
@@ -210,18 +241,20 @@ export function VisitsScreen() {
           title="Which properties take visits"
           description="Booking is offered only on the properties you turn on here."
         >
-          <ListContainer>
+          {/* the parent card is the only container — a flat divided list,
+              not a bordered box nested inside it. */}
+          <div className="divide-y divide-border-subtle">
             {publicProperties(s).map((p) => (
               <label
                 key={p.id}
                 htmlFor={`visit-prop-${p.id}`}
-                className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3"
+                className="flex cursor-pointer items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
               >
-                <span className="font-medium text-foreground">{p.name}</span>
-                <Switch id={`visit-prop-${p.id}`} defaultChecked />
+                <span className="min-w-0 flex-1 font-medium text-foreground">{p.name}</span>
+                <Switch id={`visit-prop-${p.id}`} defaultChecked className="shrink-0" />
               </label>
             ))}
-          </ListContainer>
+          </div>
         </SettingsCard>
 
         <SettingsCard
@@ -230,46 +263,122 @@ export function VisitsScreen() {
           title="Days you're away"
           description="Blackout dates are removed from the calendar visitors see — no bookings land on them."
           footer={
-            <Popover open={addOpen} onOpenChange={setAddOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Plus /> Add dates
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-64">
-                <div id="blackout-label" className="text-sm font-semibold text-foreground">
-                  Block a date
-                </div>
-                <Input
-                  type="date"
-                  value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
-                  aria-labelledby="blackout-label"
-                  className="mt-2"
-                />
-                <Button size="sm" variant="primary" className="mt-2 w-full" onClick={addBlackout} disabled={!newDate}>
-                  Add
-                </Button>
-              </PopoverContent>
-            </Popover>
+            <>
+              {/* desktop: a compact popover anchored to the trigger */}
+              <div className="hidden sm:block">
+                <Popover open={addOpen} onOpenChange={setAddOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Plus /> Add dates
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-72">
+                    <div className="text-sm font-semibold text-foreground">Block a date</div>
+                    <div className="mt-3 space-y-3">
+                      <div>
+                        <label htmlFor="blackout-date" className="text-caption font-medium text-muted-foreground">
+                          Date
+                        </label>
+                        <Input
+                          id="blackout-date"
+                          type="date"
+                          value={newDate}
+                          onChange={(e) => setNewDate(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="blackout-reason" className="text-caption font-medium text-muted-foreground">
+                          Reason (optional)
+                        </label>
+                        <Input
+                          id="blackout-reason"
+                          value={newReason}
+                          onChange={(e) => setNewReason(e.target.value)}
+                          placeholder="e.g. travelling or festival"
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                    <Button size="sm" variant="primary" className="mt-3 w-full" onClick={addBlackout} disabled={!newDate}>
+                      Add
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {/* mobile: the same small form deserves real, comfortable
+                  space rather than a floating box anchored to a small
+                  button — a bottom sheet is the project's own established
+                  pattern for this (already used by the app shell). */}
+              <div className="sm:hidden">
+                <Sheet open={addSheetOpen} onOpenChange={setAddSheetOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Plus /> Add dates
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="bottom">
+                    <SheetHeader>
+                      <SheetTitle>Block a date</SheetTitle>
+                      <SheetDescription>Visitors won't be able to book a visit on this date.</SheetDescription>
+                    </SheetHeader>
+                    <SheetBody className="space-y-4">
+                      <div>
+                        <label htmlFor="blackout-date-m" className="text-sm font-semibold text-foreground">
+                          Date
+                        </label>
+                        <Input
+                          id="blackout-date-m"
+                          type="date"
+                          value={newDate}
+                          onChange={(e) => setNewDate(e.target.value)}
+                          className="mt-1.5"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="blackout-reason-m" className="text-sm font-semibold text-foreground">
+                          Reason (optional)
+                        </label>
+                        <Input
+                          id="blackout-reason-m"
+                          value={newReason}
+                          onChange={(e) => setNewReason(e.target.value)}
+                          placeholder="e.g. travelling or festival"
+                          className="mt-1.5"
+                        />
+                      </div>
+                    </SheetBody>
+                    <SheetFooter>
+                      <Button variant="primary" onClick={addBlackout} disabled={!newDate}>
+                        Add
+                      </Button>
+                    </SheetFooter>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </>
           }
         >
           {blackouts.length ? (
-            <ListContainer>
-              {blackouts.map((d, i) => (
-                <div key={d + i} className="flex items-center justify-between gap-3 px-4 py-2.5 text-body">
-                  {d}
+            <div className="divide-y divide-border-subtle">
+              {blackouts.map((b) => (
+                <div key={b.id} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="font-medium text-foreground">{b.date}</div>
+                    {b.reason && <div className="text-caption text-muted-foreground">{b.reason}</div>}
+                  </div>
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Remove ${d}`}
-                    onClick={() => setBlackouts((b) => b.filter((_, x) => x !== i))}
+                    aria-label={`Remove ${b.date}${b.reason ? ` — ${b.reason}` : ""}`}
+                    onClick={() => removeBlackout(b.id)}
+                    className="shrink-0"
                   >
                     <X />
                   </Button>
                 </div>
               ))}
-            </ListContainer>
+            </div>
           ) : (
             <p className="text-caption text-muted-foreground">No blackout dates. Add one whenever you'll be away.</p>
           )}

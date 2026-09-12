@@ -6,10 +6,9 @@ import {
   PageBody,
   SettingsCard,
   Field,
-  Segmented,
+  FieldGroup,
+  ToggleField,
   ChoiceCard,
-  ListContainer,
-  StatusBadge,
   IconTile,
   Callout,
   AdvancedLock,
@@ -17,6 +16,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useS, useDispatch, useDerived } from "@/store/hooks";
 import { ALL_PROPERTIES, FRESH, freshness } from "@/data/managr";
@@ -78,42 +78,28 @@ export function AvailabilityScreen() {
       />
 
       <PageBody>
-        {/* master on/off — identity+explanation left, current state+toggle
-            right, the same horizontal relationship used on /website for a
-            single-control card, so it doesn't read as a tiny switch floating
-            in an otherwise empty wide surface. */}
-        <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6">
-          <div className="flex min-w-0 items-start gap-3">
-            <IconTile icon={<Eye />} tint="green" size="md" className="mt-0.5" />
-            <div className="min-w-0">
-              <h3 className="text-section font-bold leading-snug text-foreground">Availability on your website</h3>
-              <p className="mt-0.5 max-w-[52ch] text-caption leading-snug text-muted-foreground">
-                Property pages show how many beds are free — pulled live from the bed status your staff keep.
-              </p>
-            </div>
+        {/* one binary setting: name + a one-line consequence, one trailing
+            toggle — the same shape at every width. No separate On/Off
+            label, no divider: the switch's own state (and its native
+            aria-checked, announced automatically to assistive tech) already
+            communicates on/off, so showing it again as text was solving a
+            problem the control already solves. */}
+        <Card className="flex items-center gap-4 p-5 sm:p-6">
+          <IconTile icon={<Eye />} tint="green" size="md" className="shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h3 id="avail-master-heading" className="text-section font-bold leading-snug text-foreground">
+              Availability on your website
+            </h3>
+            <p className="mt-0.5 text-caption leading-snug text-muted-foreground">
+              Shows how many beds are free on each property page.
+            </p>
           </div>
-          {/* status + control read as a continuation of the setting above,
-              not a second detached block: a border-t marks the boundary on
-              mobile (same idiom as Website Home's "Website visibility"),
-              full-width justify-between so the switch anchors to a true
-              edge; reverts to a content-width group with a border-l once
-              the card goes horizontal at sm. */}
-          <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-4 shrink-0 sm:justify-start sm:border-t-0 sm:border-l sm:border-border-subtle sm:pl-6 sm:pt-0">
-            <div className="min-w-0">
-              <StatusBadge status={s.availOn ? "live" : "off"} className="text-sm font-semibold">
-                {s.availOn ? "On" : "Off"}
-              </StatusBadge>
-              <div className="mt-0.5 text-caption text-muted-foreground">
-                {s.availOn ? "Visible on property pages" : "Hidden from visitors"}
-              </div>
-            </div>
-            <Switch
-              checked={s.availOn}
-              onCheckedChange={(v) => set({ availOn: v })}
-              aria-label="Show availability on my website"
-              className="ml-1 shrink-0"
-            />
-          </div>
+          <Switch
+            checked={s.availOn}
+            onCheckedChange={(v) => set({ availOn: v })}
+            aria-labelledby="avail-master-heading"
+            className="shrink-0"
+          />
         </Card>
 
         {s.availOn && (
@@ -151,42 +137,45 @@ export function AvailabilityScreen() {
                 ))}
               </RadioGroup>
 
-              {/* secondary — how that choice is phrased. Set apart in a
-                  quiet inset panel so it reads as configuration of the
-                  decision above, not a fourth peer option. */}
-              <div className="rounded-xl bg-surface-2 p-4 sm:p-5">
-                <div className="mb-3 text-micro font-bold uppercase tracking-[0.07em] text-faint">Wording</div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <div className="text-sm font-semibold text-foreground">How to phrase the count</div>
-                    <Segmented
-                      className="mt-2"
-                      value={s.availNumbers}
-                      onChange={(v) => set({ availNumbers: v as never })}
-                      options={[
-                        { value: "exact", label: "Show the count" },
-                        { value: "vague", label: "Just a label" },
-                      ]}
-                    />
-                    <p className="mt-1.5 text-caption leading-relaxed text-muted-foreground">
-                      “Just a label” stops competitors counting your empty beds.
-                    </p>
-                  </div>
-                  <div className="flex items-start justify-between gap-3 sm:border-l sm:border-border-subtle sm:pl-4">
+              {/* secondary — two settings that configure the decision above,
+                  each a plain setting-name/control row rather than an
+                  implementation concept ("Wording") the user has to learn.
+                  A border-t marks this as a distinct group from the choice
+                  above; the divide-y between the two rows themselves is the
+                  only other separator — no eyebrow, no nested panel. */}
+              <div className="border-t border-border-subtle pt-4">
+                <FieldGroup>
+                  <div className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-foreground">Show the date a bed next frees up</div>
+                      <label htmlFor="avail-phrase" className="block text-body font-medium text-foreground">
+                        How to phrase the count
+                      </label>
                       <p className="mt-0.5 text-caption leading-relaxed text-muted-foreground">
-                        e.g. “Full — from 20 Sept” instead of just “Full”.
+                        Exact numbers, or just a status like “Available”.
                       </p>
                     </div>
-                    <Switch
-                      checked={s.availFromDate}
-                      onCheckedChange={(v) => set({ availFromDate: v })}
-                      aria-label="Show the date a bed next frees up"
-                      className="mt-0.5 shrink-0"
-                    />
+                    <Select value={s.availNumbers} onValueChange={(v) => set({ availNumbers: v as never })}>
+                      <SelectTrigger id="avail-phrase" className="w-full shrink-0 sm:w-[180px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        <SelectItem value="exact" description="e.g. “3 beds available”.">
+                          Show the count
+                        </SelectItem>
+                        <SelectItem value="vague" description="Stops competitors counting your empty beds.">
+                          Just a label
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
+                  <ToggleField
+                    label="Show the date a bed next frees up"
+                    description="e.g. “Full — from 20 Sept” instead of just “Full”."
+                    control={
+                      <Switch checked={s.availFromDate} onCheckedChange={(v) => set({ availFromDate: v })} />
+                    }
+                  />
+                </FieldGroup>
               </div>
             </SettingsCard>
 
@@ -212,7 +201,11 @@ export function AvailabilityScreen() {
               title="Which properties"
               description="Turn availability on per property. Properties that aren't published or are stale can't show it."
             >
-              <ListContainer>
+              {/* the parent SettingsCard is the only container — a flat
+                  divided list, not a bordered box nested inside it. Status
+                  communicates hierarchy through color and subordinate size
+                  alone; no decorative dot in front of it. */}
+              <div className="divide-y divide-border-subtle">
                 {rows.map((p) => {
                   const stale = staleProp(s, p);
                   const fr = freshness(p.updatedDaysAgo);
@@ -226,28 +219,29 @@ export function AvailabilityScreen() {
                       : fr === "slightly"
                         ? `Updated ${p.updatedDaysAgo} days ago — still shown`
                         : `Not updated in ${p.updatedDaysAgo} days — hidden until staff refresh it`;
-                  // off = administratively hidden (gray); a stale or
-                  // slightly-aging freshness is worth a glance even though
-                  // it isn't hidden outright (amber); a genuinely fresh
-                  // property gets no dot at all — restrained, not a badge
-                  // on every row.
-                  const statusTone: "off" | "attention" | null = off ? "off" : fr !== "fresh" ? "attention" : null;
+                  // stale or slightly-aging freshness is worth a glance even
+                  // though the property isn't administratively hidden —
+                  // everything else (fresh, or off entirely) is a plain,
+                  // quiet status; the text itself already says "Unpublished"
+                  // or "Under review", so no separate color tier for "off".
+                  const needsAttention = !off && fr !== "fresh";
                   return (
                     // name + status form one left-anchored column at every
                     // width, so the toggle's horizontal position never
                     // depends on how long the status sentence is — this
                     // single structure already works from 375px to 1440px,
                     // it doesn't need a separate mobile composition.
-                    <div key={p.id} className="flex items-start justify-between gap-3 px-4 py-3">
+                    <div key={p.id} className="flex items-start justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <label htmlFor={`avail-prop-${p.id}`} className={cn("min-w-0 flex-1", !off && "cursor-pointer")}>
                         <span className="block font-medium text-foreground">{p.name}</span>
-                        {statusTone ? (
-                          <StatusBadge status={statusTone} className="mt-0.5 text-caption">
-                            {line}
-                          </StatusBadge>
-                        ) : (
-                          <span className="mt-0.5 block text-caption text-muted-foreground">{line}</span>
-                        )}
+                        <span
+                          className={cn(
+                            "mt-0.5 block text-caption",
+                            needsAttention ? "font-medium text-warning" : "text-muted-foreground",
+                          )}
+                        >
+                          {line}
+                        </span>
                       </label>
                       <Switch
                         id={`avail-prop-${p.id}`}
@@ -259,7 +253,7 @@ export function AvailabilityScreen() {
                     </div>
                   );
                 })}
-              </ListContainer>
+              </div>
             </SettingsCard>
 
             {/* the card spans the full content grid, same as the cards

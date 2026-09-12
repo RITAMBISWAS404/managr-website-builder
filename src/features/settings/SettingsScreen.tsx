@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OWNER } from "@/data/managr";
 import { useDerived } from "@/store/hooks";
 
@@ -38,58 +39,79 @@ export function SettingsScreen() {
       {/* onInput bubbles from every native field; Radix controls call markDirty directly */}
       <div onInput={markDirty}>
         <PageBody>
-          {/* foundational — the site's identity and how it's reached. Full
-              width: two real fields plus a distinct, important address row. */}
+          {/* foundational — business name, language and the fixed web address
+              now read as three members of one settings system: same label
+              role, same control height/radius/padding (all built on the
+              shared Input/Select geometry), same LABEL-then-CONTROL rhythm.
+              Two columns from sm (address spanning below), a plain equal
+              three-up from xl now that the address column no longer needs
+              extra width for an inline action. No divider between them —
+              a divider would re-separate the one field this refinement is
+              specifically trying to make feel like a peer of the other two. */}
           <SettingsCard
             icon={<Globe />}
             tint="blue"
             title="Address & language"
             description="How your site is named and reached. The web address is fixed once your site goes live."
           >
-            {/* two intentional peer groups instead of a narrow row followed
-                by a second narrow row: editable identity/language on the
-                left, the fixed address (a first-class fact, not an
-                afterthought) on the right — divided so each half reads as
-                its own group rather than four fields loosely wrapping. */}
-            <div className="grid gap-x-10 gap-y-5 lg:grid-cols-2">
-              <div className="space-y-5">
-                <Field label="Business name shown on the site" htmlFor="biz">
-                  <Input id="biz" defaultValue={OWNER.biz} />
-                </Field>
-                <Field label="Language" htmlFor="lang">
-                  <Select defaultValue="English" onValueChange={markDirty}>
-                    <SelectTrigger id="lang">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="English">English</SelectItem>
-                      <SelectItem value="Hindi" disabled>
-                        Hindi (coming soon)
-                      </SelectItem>
-                      <SelectItem value="Marathi" disabled>
-                        Marathi (coming soon)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div>
-
-              <div className="lg:border-l lg:border-border-subtle lg:pl-10">
-                <Field label="Your web address" hint="Set for good — it goes on your boards and into WhatsApp groups.">
-                  {/* deliberate mobile stacking, not accidental wrap: the
-                      address gets its own full-width line (it's the fact
-                      that matters and is often the widest thing in the
-                      card), the action drops to its own row below rather
-                      than being squeezed onto whatever space wrapping left
-                      beside it. Reverts to one row from sm up. */}
-                  <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-                    <span className="flex min-w-0 items-center gap-1.5 font-mono text-sm text-foreground">
-                      <Lock className="size-3.5 shrink-0 text-faint" />
-                      <span className="truncate">{url}</span>
-                    </span>
-                    <Button variant="ghost" size="sm" className="shrink-0 self-start sm:self-auto">
-                      Contact support
-                    </Button>
+            <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
+              <Field label="Business name shown on the site" htmlFor="biz">
+                <Input id="biz" defaultValue={OWNER.biz} />
+              </Field>
+              <Field label="Language" htmlFor="lang">
+                <Select defaultValue="English" onValueChange={markDirty}>
+                  <SelectTrigger id="lang">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="English">English</SelectItem>
+                    <SelectItem value="Hindi" disabled>
+                      Hindi (coming soon)
+                    </SelectItem>
+                    <SelectItem value="Marathi" disabled>
+                      Marathi (coming soon)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <div className="sm:col-span-2 xl:col-span-1">
+                <Field label="Your web address" htmlFor="web-address">
+                  {/* the same Input primitive as Business name — same height,
+                      radius, border — but read-only and bg-sunken, the exact
+                      treatment Input already uses for its own disabled state.
+                      Consistency of container, not identical interaction: a
+                      lock (decorative, aria-hidden — the real signal is
+                      `readOnly` itself) plus a small info affordance replace
+                      both the old inline "Contact support" button and the
+                      floating caption line below the field; the one real
+                      product fact (why it's fixed, how to change it) now
+                      lives in one place instead of two. */}
+                  <div className="relative">
+                    <Lock
+                      aria-hidden="true"
+                      className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-faint"
+                    />
+                    <Input
+                      id="web-address"
+                      readOnly
+                      value={url}
+                      className="cursor-default truncate !bg-sunken pl-8 pr-8 font-mono !text-sm"
+                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label="Why your web address is fixed"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-faint transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+                        >
+                          <Info className="size-3.5" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-64 text-caption leading-relaxed text-muted-foreground">
+                        It goes on your boards and into WhatsApp groups, so it's set for good. Need to change it?
+                        Contact support.
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </Field>
               </div>

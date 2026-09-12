@@ -135,7 +135,7 @@ the mobile composition by accident.
 | Icon-only buttons | `size-8` (32px) grid-centered icon, `aria-label` required, wrapped in `Hint` for a tooltip. Compact-list-row scale across the whole app — not held to a 44px minimum, by established convention. |
 | Toggles | Radix `Switch`, always paired with a label it's `aria-label`'d to or sits directly beside; on mobile the label+toggle pair spans the full row width (`justify-between`) so the toggle anchors to a true edge, never floats mid-row. |
 | Segmented control | `Segmented` — `bg-sunken` track, `p-0.5`, pill buttons, active = `bg-surface shadow-xs`. **Full-width, equal-width segments below `sm`**; content-sized `inline-flex` at `sm` and up. This responsive rule lives in the shared component — don't re-implement per page. |
-| Inputs / Selects | shadcn-pattern `Input`/`Select`, `border-border`, `rounded-lg` (10px), `h-9` default |
+| Inputs / Selects | shadcn-pattern `Input`/`Select`, `border-border`, `rounded-lg` (10px), `h-9` default. `SelectItem` takes an optional `description` — a secondary line visible only in the open list (Radix mirrors only `SelectItem`'s own text into the closed trigger, so a description never leaks into the collapsed value). Use it when an option's meaning isn't obvious from its short label alone; skip it otherwise. |
 | Status pill / badge | `StatusBadge` — dot + text (inline) or a solid pill (`pill` prop) using the semantic status map (`live/ok/attention/action/off/pending/advanced`). Never build a one-off colored span for a status — always route through `StatusBadge`. |
 | Chevron / navigation affordance | `ChevronRight` at `size-4`, `text-faint`, with a `group-hover:translate-x-0.5` nudge — the established "this card/row navigates" signal. Sufficient on its own; don't add "View"/"See more" text unless the destination is ambiguous without it. |
 
@@ -146,7 +146,61 @@ inconsistency rather than fixing one.
 
 ---
 
-## 6. Responsive principles
+## 6. Setting hierarchy & component selection
+
+Established while refining Live Availability's toggle rows — applies to any setting
+anywhere in the Website workspace.
+
+**Setting → explanation → current state → control**, always in that reading order.
+The setting's own name is the heading (`text-section font-bold`, §1); its current
+state ("On", "3 properties", "English") is always the subordinate line
+(`text-sm font-semibold` — the "supporting line" case in §1's status row), never
+the other way round. A bare status word must never function as the heading a
+user reads first. Watch for this specifically at a breakpoint transition: a
+current-state block that gets its own divider/background when it drops below a
+setting on mobile can start reading as a second, self-contained heading purely
+because it now looks like its own section — if that happens, remove the divider
+and let the state continue directly under the setting's own name/description
+instead of introducing a second visual group for it.
+
+**Avoid nested cards.** A bordered or `bg-surface-2` box inside a `SettingsCard`,
+used only to visually group two or three settings, is a nested card in practice
+even when it isn't literally a `<Card>`. Prefer an eyebrow (the `text-micro`
+treatment from §1) plus a flat `FieldGroup` (`divide-y border-border-subtle`) —
+the divider does the grouping work the background box was doing, without a
+second container.
+
+**Toggle placement.** Equivalent toggle-controlled settings use a predictable
+trailing control area — the toggle sits at the end of its row, generally aligned
+to the top of the setting's content block (matches `ToggleField`'s own
+`items-start` + `pt-0.5` convention) so a longer description doesn't drag it to
+an arbitrary mid-point. Never let the toggle's horizontal position depend on
+text length, status length, or how a row happens to wrap — encode its column as
+`shrink-0` and let the label/status column be the one that grows or wraps.
+
+**Property/entity rows** (a property, bed, or other listed item with its own
+toggle): entity name is primary (`font-medium text-foreground`), its status is
+secondary and sits directly under the name (not beside it, so a long status
+sentence never pushes the toggle sideways), and the toggle stays independently
+anchored at the row's trailing edge — one structure that already works
+unchanged from 375px to 1440px, not a mobile-only or desktop-only composition.
+
+**Component selection** — match the control to the actual semantics of the choice:
+- **Toggle** (`Switch`) — a true binary on/off preference.
+- **`Segmented`** — exactly one of 2–3 short, directly-comparable options, where
+  seeing every option at once helps the decision.
+- **Select / dropdown** — several options where showing them all at once would
+  be unnecessary visual weight.
+- **Radio / `ChoiceCard`** — options that genuinely need a description before
+  choosing, not just a short label.
+- **Button** — an explicit one-time action; never a persisted state.
+- **`Callout`** — explanatory or safeguard context; never a generic settings
+  container (the same rule as §4's card-architecture entry, from the other
+  direction).
+
+---
+
+## 7. Responsive principles
 
 1. **Mobile is a different composition, not a shrunk desktop one.** Decide, per card, what
    groups exist semantically, then decide how those groups arrange at each width — don't
@@ -165,10 +219,21 @@ inconsistency rather than fixing one.
    not a bare `flex-wrap` left to resolve itself.
 7. **Desktop stays horizontally efficient.** Don't stack cards on desktop that already read
    well side-by-side; don't force a mobile-derived layout upward just for consistency's sake.
+8. **A fixed-length grid track never absorbs free space; a loose `minmax(a,b)` one can.**
+   When a grid column only needs to fit short, known content (a day abbreviation, an icon),
+   give it a single fixed length, not `minmax(a,b)` with a generous `b` — CSS Grid's track
+   sizing can grow a `minmax` track toward its own max during the "maximize tracks" step
+   before `fr` tracks get anything, producing an unexplained gap that isn't a margin/padding
+   bug at all (Visits' day/time-of-day grid — the gap before "Morning" — was exactly this).
+9. **Popover for desktop, `Sheet` (`side="bottom"`) for mobile is the established fallback**
+   for a small create/edit form (Visits' "Block a date") — a floating popover anchored to a
+   small trigger doesn't give a native input room to breathe on a phone; mount both, gate
+   each with its own open-state and `hidden sm:block` / `sm:hidden`, don't invent a third
+   pattern.
 
 ---
 
-## 7. What this document is not
+## 8. What this document is not
 
 - Not a redesign mandate. Every value above already ships in the product today.
 - Not exhaustive — it covers the roles actually in use on the Website workspace. A new page
