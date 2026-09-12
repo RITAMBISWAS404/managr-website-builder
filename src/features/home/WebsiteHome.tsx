@@ -105,11 +105,16 @@ export function WebsiteHome() {
         <div className="flex flex-col gap-3 rounded-2xl border border-ring-soft bg-surface p-5 shadow-e1 sm:flex-row sm:items-center sm:gap-4 sm:p-6">
           <IconTile icon={next.icon} tint={next.tint} size="lg" className="shadow-xs" />
           <div className="min-w-0 flex-1">
-            <div className="text-micro font-bold uppercase tracking-[0.07em] text-brand">Next</div>
+            {/* "Next" only signalled sequence, not urgency, and didn't fit
+                all three states this card can show (fixing an issue vs.
+                publishing vs. no properties yet) — "Needs attention" reads
+                correctly for all three and reuses the same word Health
+                already uses for this exact semantic state. */}
+            <div className="text-micro font-bold uppercase tracking-[0.07em] text-brand">Needs attention</div>
             <div className="mt-1 text-section font-semibold text-foreground">{next.title}</div>
             <p className="mt-0.5 text-body text-muted-foreground">{next.body}</p>
           </div>
-          <Button variant="primary" className="shrink-0" onClick={() => nav(next.to)}>
+          <Button variant="primary" className="w-full shrink-0 sm:w-auto" onClick={() => nav(next.to)}>
             {next.cta} <ArrowRight />
           </Button>
         </div>
@@ -141,16 +146,20 @@ export function WebsiteHome() {
             </div>
           </div>
 
-          {/* status + the one control that changes it — grouped as a single
-              idea, set off from identity by a rule on wide screens only */}
-          <div className="flex shrink-0 items-center gap-3 self-start lg:self-auto lg:border-x lg:border-border-subtle lg:px-6">
+          {/* the setting, then its current state, then the control — in that
+              order. Previously "Live" (the state) led with no name above it;
+              "Website visibility" now names the setting the same way Health
+              and Plan lead with their own heading, so this reads as the same
+              kind of fact rather than a differently-composed one. On mobile
+              the row spans full width so the toggle anchors to the true
+              right edge instead of sitting close after the label; at `lg:`
+              it reverts to the original vertical rule beside identity. */}
+          <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-4 lg:shrink-0 lg:justify-start lg:self-auto lg:border-t-0 lg:border-x lg:border-border-subtle lg:px-6 lg:pt-0">
             <div className="min-w-0">
-              <StatusBadge status={s.siteLive ? "live" : "off"} className="text-section font-bold">
+              <div className="text-section font-bold text-foreground">Website visibility</div>
+              <StatusBadge status={s.siteLive ? "live" : "off"} className="mt-0.5 text-sm font-semibold">
                 {s.siteLive ? "Live" : "Offline"}
               </StatusBadge>
-              <div className="mt-1 text-caption text-muted-foreground">
-                {s.siteLive ? "Visitors can see it" : "Visitors see a short notice"}
-              </div>
             </div>
             <Switch
               checked={s.siteLive}
@@ -160,53 +169,63 @@ export function WebsiteHome() {
             />
           </div>
 
-          {/* utility actions — quieter than the identity/status, grouped as
-              one small control cluster rather than competing individually */}
-          <div className="flex shrink-0 items-center self-start divide-x divide-border overflow-hidden rounded-lg border border-border bg-surface shadow-xs lg:self-auto">
-            <Hint label="Copy address">
-              <button onClick={copyLink} aria-label="Copy website address" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><Copy /></button>
-            </Hint>
-            <Hint label="Share QR code">
-              <button aria-label="Share QR code" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><QrCode /></button>
-            </Hint>
-            <Hint label="Open live site">
-              <Link to="/website/preview" aria-label="Open live site" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><ExternalLink /></Link>
-            </Hint>
+          {/* utility actions — its own quiet group below the same kind of
+              rule as the row above. Desktop keeps the compact icon-only
+              pill (three actions is little enough that a hint on hover is
+              plenty); mobile has no hover to reveal that hint, so it swaps
+              to three equal-width labeled buttons that use the row's full
+              width and are understandable without relying on icon
+              recognition — the same copy/QR/open actions, not new ones. */}
+          <div className="border-t border-border-subtle pt-4 lg:shrink-0 lg:self-auto lg:border-t-0 lg:pt-0">
+            <div className="grid grid-cols-3 gap-2 sm:hidden">
+              <Button variant="outline" size="sm" onClick={copyLink}>
+                <Copy /> Copy link
+              </Button>
+              <Button variant="outline" size="sm" aria-label="Share QR code">
+                <QrCode /> QR code
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/website/preview">
+                  <ExternalLink /> Open site
+                </Link>
+              </Button>
+            </div>
+            <div className="hidden items-center divide-x divide-border overflow-hidden rounded-lg border border-border bg-surface shadow-xs sm:flex">
+              <Hint label="Copy address">
+                <button onClick={copyLink} aria-label="Copy website address" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><Copy /></button>
+              </Hint>
+              <Hint label="Share QR code">
+                <button aria-label="Share QR code" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><QrCode /></button>
+              </Hint>
+              <Hint label="Open live site">
+                <Link to="/website/preview" aria-label="Open live site" className="grid size-8 place-items-center text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 [&_svg]:size-4"><ExternalLink /></Link>
+              </Hint>
+            </div>
           </div>
         </Card>
 
         {/* supporting row — Health and Plan are sibling facts about the
-            same website, so they share the row equally; which one needs
-            attention is communicated by its own badge/tone, not by giving
-            it more width than its sibling. */}
+            same website, so they share the row equally. Each is now a
+            single destination: icon, a real heading, one status/value
+            line, and a trailing chevron — no inner button competing with
+            the content, no explanatory sentence repeating what the
+            destination page already explains in full. */}
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <FactCard
             icon={healthVisual.icon}
             tint={healthVisual.tint}
             label="Health"
+            value={<StatusBadge status={health.status} className="text-sm font-semibold">{health.label}</StatusBadge>}
+            to="/website/health"
             attention={health.status === "action" || health.status === "attention"}
-            action={
-              health.status === "ok"
-                ? <PanelLink to="/website/health">Full report</PanelLink>
-                : (
-                  <Button asChild variant="outline" size="sm" className="shrink-0">
-                    <Link to="/website/health">Review <ChevronRight /></Link>
-                  </Button>
-                )
-            }
-          >
-            <StatusBadge status={health.status} className="text-section font-bold">{health.label}</StatusBadge>
-            <div className="mt-1 truncate text-caption text-muted-foreground">{health.detail}</div>
-          </FactCard>
+          />
           <FactCard
             icon={<CreditCard />}
             tint="blue"
             label="Plan"
-            action={<PanelLink to={advActive ? "/website/plan" : "/website/upgrade"}>{advActive ? "Manage plan" : "See Advanced"}</PanelLink>}
-          >
-            <div className="truncate text-section font-bold text-foreground">{advActive ? "Advanced" : "Basic — free"}</div>
-            <div className="mt-1 text-caption text-muted-foreground">{advActive ? "Every feature is on" : "Upgrade any time"}</div>
-          </FactCard>
+            value={advActive ? "Advanced" : "Basic — free"}
+            to={advActive ? "/website/plan" : "/website/upgrade"}
+          />
         </div>
       </section>
 
@@ -290,45 +309,29 @@ export function WebsiteHome() {
     column only at the same width the outer 50/50 row itself stacks, so the
     action always has a full-width row to sit in, never a squeezed corner. */
 function FactCard({
-  icon, tint = "blue", label, children, action, attention = false,
+  icon, tint = "blue", label, value, to, attention = false,
 }: {
   icon?: React.ReactNode;
   tint?: Tint;
   label: string;
-  children: React.ReactNode;
-  action?: React.ReactNode;
+  value: React.ReactNode;
+  to: string;
   attention?: boolean;
 }) {
   return (
-    <Card
-      className={cn(
-        "flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5",
-        attention && "border-warning-border bg-warning-wash",
-      )}
-    >
-      <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-        <IconTile icon={icon} tint={tint} size="lg" className="shrink-0" />
-        <div className="min-w-0 flex-1 text-sm">
-          <div className="text-micro font-bold uppercase tracking-[0.07em] text-faint">{label}</div>
-          <div className="mt-1 min-w-0">{children}</div>
-        </div>
-      </div>
-      {action && <div className="shrink-0 sm:self-center">{action}</div>}
-    </Card>
-  );
-}
-
-/** the interactive text-link used inside a StatPanel — one "chevron
-    text-action" pattern shared with SectionLink below, just anchored in a
-    different place, so every text-only action on the page reads the same. */
-function PanelLink({ to, children }: { to: string; children: React.ReactNode }) {
-  return (
     <Link
       to={to}
-      className="group/link inline-flex items-center gap-1 rounded-sm text-caption font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className={cn(
+        "group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-e1 transition-[background-color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:gap-4 sm:p-5",
+        attention ? "border-warning-border bg-warning-wash" : "hover:border-border-strong hover:bg-surface-2",
+      )}
     >
-      {children}
-      <ChevronRight className="size-3.5 transition-transform group-hover/link:translate-x-0.5" />
+      <IconTile icon={icon} tint={tint} size="lg" className="shrink-0" />
+      <div className="min-w-0 flex-1">
+        <div className="text-section font-bold leading-snug text-foreground">{label}</div>
+        <div className="mt-0.5 min-w-0">{value}</div>
+      </div>
+      <ChevronRight className="size-4 shrink-0 text-faint transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
 }
