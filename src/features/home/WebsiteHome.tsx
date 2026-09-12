@@ -225,7 +225,11 @@ export function WebsiteHome() {
       {/* ================= manage ================= */}
       <section>
         <SectionHeader>Manage</SectionHeader>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        {/* one tile per row below `sm` — six of these squeezed two-up on a
+            phone left barely any room for the name/description before
+            wrapping; full width lets each tile breathe the way "This week"
+            and every other card on this page already does at this size. */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {manage.map((m) => (
             <Link
               key={m.to}

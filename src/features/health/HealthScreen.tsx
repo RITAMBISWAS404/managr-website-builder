@@ -54,12 +54,15 @@ export function HealthScreen() {
           >
             <ListContainer>
               {check.blockers.map((b) => (
-                <div key={b.msg} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div
+                  key={b.msg}
+                  className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                >
                   <span className="min-w-0 text-body text-foreground">{b.msg}</span>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="shrink-0"
+                    className="shrink-0 self-start sm:self-auto"
                     onClick={() => nav(JUMP[b.where] ?? "/website/editor")}
                   >
                     Go fix this <ChevronRight />
@@ -79,9 +82,12 @@ export function HealthScreen() {
           >
             <ListContainer>
               {check.warnings.map((w) => (
-                <div key={w.msg} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div
+                  key={w.msg}
+                  className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                >
                   <span className="min-w-0 text-body text-foreground">{w.msg}</span>
-                  <span className="flex shrink-0 items-center gap-1">
+                  <span className="flex shrink-0 items-center gap-1 self-start sm:self-auto">
                     <Button size="sm" variant="outline" onClick={() => nav(JUMP[w.where] ?? "/website/editor")}>
                       Review
                     </Button>

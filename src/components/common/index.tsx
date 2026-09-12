@@ -700,7 +700,12 @@ export function Segmented<T extends string>({
   className?: string;
 }) {
   return (
-    <div className={cn("inline-flex rounded-lg border border-border-subtle bg-sunken p-0.5", className)}>
+    // full-width, equal-width segments below `sm` — a mobile segmented
+    // control is a primary tap target, not a cluster of small floating
+    // buttons, so it should use the row it's given rather than hug its own
+    // label width. Reverts to its original compact, content-sized inline
+    // control at `sm` and up — untouched there.
+    <div className={cn("flex w-full rounded-lg border border-border-subtle bg-sunken p-0.5 sm:inline-flex sm:w-auto", className)}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -708,7 +713,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.value)}
           aria-pressed={value === o.value}
           className={cn(
-            "rounded-[7px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+            "flex flex-1 items-center justify-center rounded-[7px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 sm:flex-none",
             size === "sm" ? "px-2.5 py-1 text-caption" : "px-3 py-1.5 text-sm",
             value === o.value ? "bg-surface text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground",
           )}

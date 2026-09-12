@@ -220,11 +220,20 @@ export function AvailabilityScreen() {
                         ? `Updated ${p.updatedDaysAgo} days ago — still shown`
                         : `Not updated in ${p.updatedDaysAgo} days — hidden until staff refresh it`;
                   return (
-                    <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    // name on its own line, status + switch as a deliberate
+                    // second row below `sm` — a long freshness message (e.g.
+                    // "Not updated in 22 days…") no longer has to compete
+                    // with the switch for the same line; both get their own
+                    // full-width row, status left / switch right, rather
+                    // than wrapping into whatever room happened to be left.
+                    <div
+                      key={p.id}
+                      className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                    >
                       <label htmlFor={`avail-prop-${p.id}`} className={cn("min-w-0", !off && "cursor-pointer")}>
                         <span className="block font-medium text-foreground">{p.name}</span>
                       </label>
-                      <div className="flex shrink-0 items-center gap-3">
+                      <div className="flex items-center justify-between gap-3 sm:shrink-0">
                         {hidden ? (
                           <StatusBadge status={off ? "off" : "attention"} className="text-caption">
                             {line}
